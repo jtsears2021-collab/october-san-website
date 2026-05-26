@@ -560,81 +560,38 @@
     document.getElementById('collection-date').textContent = dateStr + ' Collection';
     document.getElementById('collection-label').textContent = dateStr;
 
-    // ─── FETCH NFTs FROM THIRDWEB SDK ────────────────────────
-    async function loadNFTs() {
-      try {
-        // Use Thirdweb SDK (loaded via CDN)
-        const { createThirdwebClient, getContract, getNFTs, totalSupply } = window.thirdweb || {};
-
-        if (!createThirdwebClient) {
-          console.log('SDK not loaded yet, retrying...');
-          setTimeout(loadNFTs, 1000);
-          return;
-        }
-
-        const client = createThirdwebClient({ clientId: CLIENT_ID });
-
-        const contract = getContract({
-          client,
-          chain: { id: 137, rpc: `https://137.rpc.thirdweb.com/${CLIENT_ID}` },
-          address: CONTRACT_ADDRESS,
-        });
-
-        // Get total supply first
-        let supply = 0;
-        try {
-          const ts = await totalSupply({ contract });
-          supply = Number(ts);
-        } catch(e) {
-          supply = 2; // We know we have 2
-        }
-
-        // Get NFTs
-        const nfts = await getNFTs({ contract, start: 0, count: 10 });
-
-        if (!nfts || nfts.length === 0) {
-          showEmptyState();
-          return;
-        }
-
-        renderNFTs(nfts, supply);
-        updateStats(supply);
-
-      } catch (err) {
-        console.log('SDK fetch failed:', err.message);
-        // Show what we know exists
-        showKnownNFTs();
-      }
+    // ─── DISPLAY NFTs ────────────────────────────────────────
+    function loadNFTs() {
+      showGenesisNFT();
     }
 
-    function showKnownNFTs() {
-      // We know the Genesis NFT exists - show it with its IPFS image
-      const genesisIPFS = 'ipfs://QmXoypizjW3WknFiJnKLwHCnL72vedxjQkDDP1mXWo6uco';
+    function showGenesisNFT() {
       const grid = document.getElementById('nft-grid');
       grid.innerHTML = `<div class="collection-grid">
         <div class="nft-card">
-          <div class="nft-placeholder" style="background: linear-gradient(135deg, #0d1f35, #1a3a5c);">
-            <div style="text-align:center; padding: 1rem;">
-              <div style="font-family: Bebas Neue, sans-serif; font-size: 1.5rem; color: var(--sky); margin-bottom: 0.5rem;">GENESIS</div>
-              <div style="font-size: 0.6rem; color: var(--muted); letter-spacing: 0.1em;">DODGER STADIUM</div>
+          <div class="nft-placeholder" style="background: linear-gradient(135deg, #0a1628, #1a3a5c); position:relative; overflow:hidden;">
+            <div style="position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:0.5rem; padding:1rem;">
+              <div style="font-family: 'Bebas Neue', sans-serif; font-size: 3rem; color: rgba(107,173,232,0.15); letter-spacing:0.1em;">001</div>
+              <div style="font-size: 0.55rem; letter-spacing:0.2em; text-transform:uppercase; color:var(--sky);">GENESIS · DODGER STADIUM</div>
+              <div style="font-size: 0.5rem; letter-spacing:0.15em; color:var(--muted); text-align:center;">IT'S TIME FOR<br>DODGERS BASEBALL</div>
             </div>
           </div>
           <div class="nft-card-info">
             <div class="nft-card-number">#0 · October-San Genesis</div>
             <div class="nft-card-name">October-San Genesis</div>
-            <div class="nft-card-price"><span>Supply: 2</span><span>Owned</span></div>
+            <div class="nft-card-price"><span>Founder Edition</span><span>Owned ✓</span></div>
           </div>
         </div>
         <div class="nft-card">
-          <div class="nft-placeholder"><div class="nft-num">—</div></div>
+          <div class="nft-placeholder"><div class="nft-num" style="font-size:3rem; opacity:0.08;">—</div></div>
           <div class="nft-card-info">
-            <div class="nft-card-number">Collection Open</div>
+            <div class="nft-card-number">Collection Open · May 25, 2026</div>
             <div class="nft-card-name">Your Moment Here</div>
             <div class="nft-card-price"><span>Mint via app</span><span>↓</span></div>
           </div>
         </div>
         <div class="nft-card">
-          <div class="nft-placeholder"><div class="nft-num">—</div></div>
+          <div class="nft-placeholder"><div class="nft-num" style="font-size:3rem; opacity:0.08;">—</div></div>
           <div class="nft-card-info">
             <div class="nft-card-number">Every Game · Every Play</div>
             <div class="nft-card-name">Every Moment a Collectible</div>
@@ -642,7 +599,7 @@
           </div>
         </div>
         <div class="nft-card">
-          <div class="nft-placeholder"><div class="nft-num">—</div></div>
+          <div class="nft-placeholder"><div class="nft-num" style="font-size:3rem; opacity:0.08;">—</div></div>
           <div class="nft-card-info">
             <div class="nft-card-number">App Coming Soon</div>
             <div class="nft-card-name">Mint an October-San Moment</div>
@@ -653,125 +610,32 @@
 
       document.getElementById('marketplace-listings').innerHTML = `
         <div class="listing-row">
-          <div class="listing-thumb" style="background: linear-gradient(135deg, #0d1f35, #1a3a5c); color: var(--sky); font-size: 0.7rem;">GEN</div>
+          <div class="listing-thumb" style="background: linear-gradient(135deg, #0a1628, #1a3a5c); color: var(--sky); font-size: 0.65rem; letter-spacing:0.05em; text-align:center; line-height:1.2; padding:0.3rem;">OCT<br>GEN</div>
           <div>
             <div class="listing-name">October-San Genesis</div>
-            <div class="listing-collection">Founder's Edition · Dodger Stadium</div>
+            <div class="listing-collection">Founder's Edition · Dodger Stadium · May 24, 2026</div>
           </div>
           <div class="listing-edition">#0 · Supply: 2</div>
           <div>
             <div class="listing-price">— POL</div>
-            <div class="listing-price-sub">Not listed</div>
+            <div class="listing-price-sub">Founder hold</div>
           </div>
-          <button class="listing-btn" onclick="window.open('https://polygonscan.com/address/${CONTRACT_ADDRESS}', '_blank')">View on Chain</button>
+          <button class="listing-btn" onclick="window.open('https://polygonscan.com/address/0x36aF73AbABEf8d9DEFfDc29509aeACc3a3c4b164', '_blank')">On-Chain ↗</button>
+        </div>
+        <div class="listing-row" style="opacity:0.4;">
+          <div class="listing-thumb">—</div>
+          <div>
+            <div class="listing-name">Your NFT Could Be Here</div>
+            <div class="listing-collection">Mint via the October-San app</div>
+          </div>
+          <div class="listing-edition">— of 1,000</div>
+          <div><div class="listing-price">—</div><div class="listing-price-sub">—</div></div>
+          <button class="listing-btn" style="opacity:0.5;">Soon</button>
         </div>`;
 
       updateStats(2);
     }
 
-    function renderNFTs(nfts) {
-      const grid = document.getElementById('nft-grid');
-      const display = nfts.slice(0, 4);
-
-      grid.innerHTML = `<div class="collection-grid">${display.map((nft, i) => {
-        const id = nft.id || nft.tokenId || (i + 1);
-        const name = nft.metadata?.name || nft.name || `October-San #${id}`;
-        const image = nft.metadata?.image || nft.image || null;
-        const supply = nft.supply || 1;
-
-        return `
-          <div class="nft-card">
-            ${image
-              ? `<img class="nft-media" src="${image}" alt="${name}" onerror="this.parentElement.querySelector('.nft-placeholder') && (this.style.display='none')">`
-              : `<div class="nft-placeholder"><div class="nft-num">${String(id).padStart(3,'0')}</div></div>`
-            }
-            <div class="nft-card-info">
-              <div class="nft-card-number">#${id} · ${dateStr}</div>
-              <div class="nft-card-name">${name}</div>
-              <div class="nft-card-price"><span>OCTSN</span><span>Collect</span></div>
-            </div>
-          </div>`;
-      }).join('')}</div>`;
-
-      // Marketplace listings
-      const listings = document.getElementById('marketplace-listings');
-      listings.innerHTML = nfts.slice(0, 5).map((nft, i) => {
-        const id = nft.id || nft.tokenId || (i + 1);
-        const name = nft.metadata?.name || nft.name || `October-San #${id}`;
-        const image = nft.metadata?.image || null;
-
-        return `
-          <div class="listing-row">
-            <div class="listing-thumb">
-              ${image ? `<img src="${image}" alt="${name}">` : String(id).padStart(3,'0')}
-            </div>
-            <div>
-              <div class="listing-name">${name}</div>
-              <div class="listing-collection">${dateStr} Collection</div>
-            </div>
-            <div class="listing-edition">#${id} of ${DAILY_CAP.toLocaleString()}</div>
-            <div>
-              <div class="listing-price">— POL</div>
-              <div class="listing-price-sub">Make offer</div>
-            </div>
-            <button class="listing-btn">View</button>
-          </div>`;
-      }).join('');
-    }
-
-    function showEmptyState() {
-      const grid = document.getElementById('nft-grid');
-      grid.innerHTML = `
-        <div class="collection-grid">
-          <div class="nft-card">
-            <div class="nft-placeholder"><div class="nft-num">001</div></div>
-            <div class="nft-card-info">
-              <div class="nft-card-number">#1 of 1,000 · ${dateStr}</div>
-              <div class="nft-card-name">Genesis Moment</div>
-              <div class="nft-card-price"><span>Be first to mint</span><span>→</span></div>
-            </div>
-          </div>
-          <div class="nft-card">
-            <div class="nft-placeholder"><div class="nft-num">—</div></div>
-            <div class="nft-card-info">
-              <div class="nft-card-number">Today's Collection Open</div>
-              <div class="nft-card-name">Your Moment Here</div>
-              <div class="nft-card-price"><span>Mint via app</span><span>↓</span></div>
-            </div>
-          </div>
-          <div class="nft-card">
-            <div class="nft-placeholder"><div class="nft-num">—</div></div>
-            <div class="nft-card-info">
-              <div class="nft-card-number">Limited to 1,000</div>
-              <div class="nft-card-name">Every Game. Every Moment.</div>
-              <div class="nft-card-price"><span>On Polygon</span><span>◆</span></div>
-            </div>
-          </div>
-          <div class="nft-card">
-            <div class="nft-placeholder"><div class="nft-num">—</div></div>
-            <div class="nft-card-info">
-              <div class="nft-card-number">App Coming Soon</div>
-              <div class="nft-card-name">Mint an October-San Moment</div>
-              <div class="nft-card-price"><span>iOS & Android</span><span>↓</span></div>
-            </div>
-          </div>
-        </div>`;
-
-      document.getElementById('marketplace-listings').innerHTML = `
-        <div class="status-msg">
-          The marketplace is live on Polygon.<br>
-          <span style="color: var(--sky);">Mint the first October-San NFT to get started.</span>
-        </div>`;
-    }
-
-    function updateStats(count) {
-      const pct = Math.min((count / DAILY_CAP) * 100, 100);
-      document.getElementById('minted-count').textContent = `${count} / ${DAILY_CAP.toLocaleString()}`;
-      document.getElementById('progress-fill').style.width = pct + '%';
-      document.getElementById('hero-minted').textContent = count;
-      const phoneMinted = document.getElementById('phone-minted');
-      if (phoneMinted) phoneMinted.textContent = `${count} minted`;
-    }
 
     // Load NFTs on page load
     loadNFTs();
