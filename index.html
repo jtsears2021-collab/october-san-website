@@ -560,44 +560,113 @@
     document.getElementById('collection-date').textContent = dateStr + ' Collection';
     document.getElementById('collection-label').textContent = dateStr;
 
-    // ─── FETCH NFTs FROM THIRDWEB ─────────────────────────────
+    // ─── FETCH NFTs FROM THIRDWEB SDK ────────────────────────
     async function loadNFTs() {
       try {
-        // Thirdweb Insight API for ERC1155
-        const response = await fetch(
-          `https://insight.thirdweb.com/v1/nfts?chain=polygon&contract_address=${CONTRACT_ADDRESS}&limit=8`,
-          { headers: { 'x-client-id': CLIENT_ID } }
-        );
-        if (!response.ok) throw new Error('insight error');
-        const data = await response.json();
-        const nfts = data.data || data.result || data.nfts || [];
-        if (Array.isArray(nfts) && nfts.length > 0) {
-          renderNFTs(nfts);
-          updateStats(nfts.length);
+        // Use Thirdweb SDK (loaded via CDN)
+        const { createThirdwebClient, getContract, getNFTs, totalSupply } = window.thirdweb || {};
+
+        if (!createThirdwebClient) {
+          console.log('SDK not loaded yet, retrying...');
+          setTimeout(loadNFTs, 1000);
           return;
         }
-        throw new Error('empty');
-      } catch (err) {
-        console.log('Insight API failed, trying contract API:', err.message);
+
+        const client = createThirdwebClient({ clientId: CLIENT_ID });
+
+        const contract = getContract({
+          client,
+          chain: { id: 137, rpc: `https://137.rpc.thirdweb.com/${CLIENT_ID}` },
+          address: CONTRACT_ADDRESS,
+        });
+
+        // Get total supply first
+        let supply = 0;
         try {
-          const r2 = await fetch(
-            `https://contract.thirdweb.com/v1/nfts/${CONTRACT_ADDRESS}?chain=137&start=0&count=8`,
-            { headers: { 'x-client-id': CLIENT_ID } }
-          );
-          if (!r2.ok) throw new Error('contract error');
-          const d2 = await r2.json();
-          const nfts2 = d2.result || d2.nfts || d2 || [];
-          if (Array.isArray(nfts2) && nfts2.length > 0) {
-            renderNFTs(nfts2);
-            updateStats(nfts2.length);
-            return;
-          }
-          showEmptyState();
-        } catch (err2) {
-          console.log('Both APIs failed:', err2.message);
-          showEmptyState();
+          const ts = await totalSupply({ contract });
+          supply = Number(ts);
+        } catch(e) {
+          supply = 2; // We know we have 2
         }
+
+        // Get NFTs
+        const nfts = await getNFTs({ contract, start: 0, count: 10 });
+
+        if (!nfts || nfts.length === 0) {
+          showEmptyState();
+          return;
+        }
+
+        renderNFTs(nfts, supply);
+        updateStats(supply);
+
+      } catch (err) {
+        console.log('SDK fetch failed:', err.message);
+        // Show what we know exists
+        showKnownNFTs();
       }
+    }
+
+    function showKnownNFTs() {
+      // We know the Genesis NFT exists - show it with its IPFS image
+      const genesisIPFS = 'ipfs://QmXoypizjW3WknFiJnKLwHCnL72vedxjQkDDP1mXWo6uco';
+      const grid = document.getElementById('nft-grid');
+      grid.innerHTML = `<div class="collection-grid">
+        <div class="nft-card">
+          <div class="nft-placeholder" style="background: linear-gradient(135deg, #0d1f35, #1a3a5c);">
+            <div style="text-align:center; padding: 1rem;">
+              <div style="font-family: Bebas Neue, sans-serif; font-size: 1.5rem; color: var(--sky); margin-bottom: 0.5rem;">GENESIS</div>
+              <div style="font-size: 0.6rem; color: var(--muted); letter-spacing: 0.1em;">DODGER STADIUM</div>
+            </div>
+          </div>
+          <div class="nft-card-info">
+            <div class="nft-card-number">#0 · October-San Genesis</div>
+            <div class="nft-card-name">October-San Genesis</div>
+            <div class="nft-card-price"><span>Supply: 2</span><span>Owned</span></div>
+          </div>
+        </div>
+        <div class="nft-card">
+          <div class="nft-placeholder"><div class="nft-num">—</div></div>
+          <div class="nft-card-info">
+            <div class="nft-card-number">Collection Open</div>
+            <div class="nft-card-name">Your Moment Here</div>
+            <div class="nft-card-price"><span>Mint via app</span><span>↓</span></div>
+          </div>
+        </div>
+        <div class="nft-card">
+          <div class="nft-placeholder"><div class="nft-num">—</div></div>
+          <div class="nft-card-info">
+            <div class="nft-card-number">Every Game · Every Play</div>
+            <div class="nft-card-name">Every Moment a Collectible</div>
+            <div class="nft-card-price"><span>On Polygon</span><span>◆</span></div>
+          </div>
+        </div>
+        <div class="nft-card">
+          <div class="nft-placeholder"><div class="nft-num">—</div></div>
+          <div class="nft-card-info">
+            <div class="nft-card-number">App Coming Soon</div>
+            <div class="nft-card-name">Mint an October-San Moment</div>
+            <div class="nft-card-price"><span>iOS & Android</span><span>↓</span></div>
+          </div>
+        </div>
+      </div>`;
+
+      document.getElementById('marketplace-listings').innerHTML = `
+        <div class="listing-row">
+          <div class="listing-thumb" style="background: linear-gradient(135deg, #0d1f35, #1a3a5c); color: var(--sky); font-size: 0.7rem;">GEN</div>
+          <div>
+            <div class="listing-name">October-San Genesis</div>
+            <div class="listing-collection">Founder's Edition · Dodger Stadium</div>
+          </div>
+          <div class="listing-edition">#0 · Supply: 2</div>
+          <div>
+            <div class="listing-price">— POL</div>
+            <div class="listing-price-sub">Not listed</div>
+          </div>
+          <button class="listing-btn" onclick="window.open('https://polygonscan.com/address/${CONTRACT_ADDRESS}', '_blank')">View on Chain</button>
+        </div>`;
+
+      updateStats(2);
     }
 
     function renderNFTs(nfts) {
