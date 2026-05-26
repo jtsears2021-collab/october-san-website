@@ -563,31 +563,40 @@
     // ─── FETCH NFTs FROM THIRDWEB ─────────────────────────────
     async function loadNFTs() {
       try {
+        // Thirdweb Insight API for ERC1155
         const response = await fetch(
-          `https://contract.thirdweb.com/v1/nfts?contractAddress=${CONTRACT_ADDRESS}&chain=${CHAIN_ID}&limit=8`,
-          {
-            headers: {
-              'x-client-id': CLIENT_ID,
-              'Content-Type': 'application/json'
-            }
-          }
+          `https://insight.thirdweb.com/v1/nfts?chain=polygon&contract_address=${CONTRACT_ADDRESS}&limit=8`,
+          { headers: { 'x-client-id': CLIENT_ID } }
         );
-
-        if (!response.ok) throw new Error('API error');
+        if (!response.ok) throw new Error('insight error');
         const data = await response.json();
-        const nfts = data.result || data.nfts || data || [];
-
-        if (!Array.isArray(nfts) || nfts.length === 0) {
-          showEmptyState();
+        const nfts = data.data || data.result || data.nfts || [];
+        if (Array.isArray(nfts) && nfts.length > 0) {
+          renderNFTs(nfts);
+          updateStats(nfts.length);
           return;
         }
-
-        renderNFTs(nfts);
-        updateStats(nfts.length);
-
+        throw new Error('empty');
       } catch (err) {
-        console.log('Thirdweb fetch note:', err.message);
-        showEmptyState();
+        console.log('Insight API failed, trying contract API:', err.message);
+        try {
+          const r2 = await fetch(
+            `https://contract.thirdweb.com/v1/nfts/${CONTRACT_ADDRESS}?chain=137&start=0&count=8`,
+            { headers: { 'x-client-id': CLIENT_ID } }
+          );
+          if (!r2.ok) throw new Error('contract error');
+          const d2 = await r2.json();
+          const nfts2 = d2.result || d2.nfts || d2 || [];
+          if (Array.isArray(nfts2) && nfts2.length > 0) {
+            renderNFTs(nfts2);
+            updateStats(nfts2.length);
+            return;
+          }
+          showEmptyState();
+        } catch (err2) {
+          console.log('Both APIs failed:', err2.message);
+          showEmptyState();
+        }
       }
     }
 
