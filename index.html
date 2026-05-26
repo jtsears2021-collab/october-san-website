@@ -3,9 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>October-San — Daily Limited Edition NFTs</title>
+  <title>October-San — Mint an October-San Moment</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Mono:wght@300;400&family=Bebas+Neue&display=swap" rel="stylesheet">
+  <!-- Thirdweb SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/thirdweb@5.88.4/dist/thirdweb.umd.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -31,10 +33,8 @@
       font-family: 'DM Mono', monospace;
       font-weight: 300;
       overflow-x: hidden;
-      cursor: default;
     }
 
-    /* NOISE OVERLAY */
     body::before {
       content: '';
       position: fixed;
@@ -48,9 +48,7 @@
     /* NAV */
     nav {
       position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
+      top: 0; left: 0; right: 0;
       z-index: 100;
       display: flex;
       align-items: center;
@@ -70,42 +68,13 @@
       letter-spacing: 0.02em;
       text-decoration: none;
     }
+    .nav-logo span { color: var(--sky); }
 
-    .nav-logo span {
-      color: var(--sky);
-    }
-
-    .nav-links {
-      display: flex;
-      align-items: center;
-      gap: 2.5rem;
-      list-style: none;
-    }
-
-    .nav-links a {
-      color: var(--muted);
-      text-decoration: none;
-      font-size: 0.7rem;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      transition: color 0.2s;
-    }
-
+    .nav-links { display: flex; align-items: center; gap: 2.5rem; list-style: none; }
+    .nav-links a { color: var(--muted); text-decoration: none; font-size: 0.7rem; letter-spacing: 0.15em; text-transform: uppercase; transition: color 0.2s; }
     .nav-links a:hover { color: var(--sky); }
-
-    .nav-cta {
-      background: transparent;
-      border: 1px solid var(--sky-border);
-      color: var(--sky) !important;
-      padding: 0.5rem 1.2rem;
-      border-radius: 2px;
-      transition: background 0.2s, color 0.2s !important;
-    }
-
-    .nav-cta:hover {
-      background: var(--sky-dim) !important;
-      color: var(--sky-light) !important;
-    }
+    .nav-cta { background: transparent; border: 1px solid var(--sky-border); color: var(--sky) !important; padding: 0.5rem 1.2rem; border-radius: 2px; transition: background 0.2s !important; }
+    .nav-cta:hover { background: var(--sky-dim) !important; }
 
     /* HERO */
     .hero {
@@ -119,762 +88,250 @@
     }
 
     .hero-glow {
-      position: absolute;
-      top: -20%;
-      right: -10%;
-      width: 600px;
-      height: 600px;
+      position: absolute; top: -20%; right: -10%;
+      width: 600px; height: 600px;
       background: radial-gradient(circle, rgba(107, 173, 232, 0.12) 0%, transparent 70%);
       pointer-events: none;
     }
 
-    .hero-glow-2 {
-      position: absolute;
-      bottom: -10%;
-      left: -5%;
-      width: 400px;
-      height: 400px;
-      background: radial-gradient(circle, rgba(107, 173, 232, 0.06) 0%, transparent 70%);
-      pointer-events: none;
-    }
-
     .hero-label {
-      font-size: 0.65rem;
-      letter-spacing: 0.25em;
-      text-transform: uppercase;
-      color: var(--sky);
-      margin-bottom: 1.5rem;
-      display: flex;
-      align-items: center;
-      gap: 0.8rem;
-      opacity: 0;
-      animation: fadeUp 0.8s ease forwards 0.2s;
+      font-size: 0.65rem; letter-spacing: 0.25em; text-transform: uppercase;
+      color: var(--sky); margin-bottom: 1.5rem;
+      display: flex; align-items: center; gap: 0.8rem;
+      opacity: 0; animation: fadeUp 0.8s ease forwards 0.2s;
     }
-
-    .hero-label::before {
-      content: '';
-      display: block;
-      width: 24px;
-      height: 1px;
-      background: var(--sky);
-    }
+    .hero-label::before { content: ''; display: block; width: 24px; height: 1px; background: var(--sky); }
 
     .hero-title {
       font-family: 'Bebas Neue', sans-serif;
       font-size: clamp(5rem, 12vw, 11rem);
-      line-height: 0.9;
-      letter-spacing: 0.02em;
-      color: var(--text);
-      margin-bottom: 1rem;
-      opacity: 0;
-      animation: fadeUp 0.8s ease forwards 0.4s;
+      line-height: 0.9; letter-spacing: 0.02em;
+      color: var(--text); margin-bottom: 1rem;
+      opacity: 0; animation: fadeUp 0.8s ease forwards 0.4s;
     }
-
     .hero-title .accent { color: var(--sky); }
 
     .hero-subtitle {
       font-family: 'Cormorant Garamond', serif;
       font-size: clamp(1.4rem, 3vw, 2.2rem);
-      font-weight: 300;
-      font-style: italic;
-      color: var(--muted);
-      margin-bottom: 3rem;
-      max-width: 600px;
-      line-height: 1.4;
-      opacity: 0;
-      animation: fadeUp 0.8s ease forwards 0.6s;
+      font-weight: 300; font-style: italic;
+      color: var(--muted); margin-bottom: 1rem;
+      max-width: 600px; line-height: 1.4;
+      opacity: 0; animation: fadeUp 0.8s ease forwards 0.6s;
+    }
+
+    .hero-subtitle-2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1rem, 2vw, 1.4rem);
+      font-weight: 300; font-style: italic;
+      color: var(--muted); margin-bottom: 3rem;
+      max-width: 600px; line-height: 1.4;
+      opacity: 0; animation: fadeUp 0.8s ease forwards 0.7s;
     }
 
     .hero-actions {
-      display: flex;
-      gap: 1rem;
-      align-items: center;
-      opacity: 0;
-      animation: fadeUp 0.8s ease forwards 0.8s;
+      display: flex; gap: 1rem; align-items: center;
+      opacity: 0; animation: fadeUp 0.8s ease forwards 0.8s;
     }
 
     .btn-primary {
-      background: var(--sky);
-      color: var(--black);
+      background: var(--sky); color: var(--black);
       padding: 0.9rem 2.2rem;
-      font-family: 'DM Mono', monospace;
-      font-size: 0.72rem;
-      font-weight: 400;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      border: none;
-      border-radius: 2px;
-      cursor: pointer;
-      text-decoration: none;
-      display: inline-block;
+      font-family: 'DM Mono', monospace; font-size: 0.72rem; font-weight: 400;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      border: none; border-radius: 2px; cursor: pointer;
+      text-decoration: none; display: inline-block;
       transition: background 0.2s, transform 0.15s;
     }
-
-    .btn-primary:hover {
-      background: var(--sky-light);
-      transform: translateY(-1px);
-    }
+    .btn-primary:hover { background: var(--sky-light); transform: translateY(-1px); }
 
     .btn-secondary {
-      background: transparent;
-      color: var(--text);
+      background: transparent; color: var(--text);
       padding: 0.9rem 2.2rem;
-      font-family: 'DM Mono', monospace;
-      font-size: 0.72rem;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      border: 1px solid var(--faint);
-      border-radius: 2px;
-      cursor: pointer;
-      text-decoration: none;
-      display: inline-block;
+      font-family: 'DM Mono', monospace; font-size: 0.72rem;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      border: 1px solid var(--faint); border-radius: 2px; cursor: pointer;
+      text-decoration: none; display: inline-block;
       transition: border-color 0.2s, color 0.2s;
     }
-
-    .btn-secondary:hover {
-      border-color: var(--sky-border);
-      color: var(--sky);
-    }
+    .btn-secondary:hover { border-color: var(--sky-border); color: var(--sky); }
 
     .hero-stats {
-      position: absolute;
-      bottom: 3rem;
-      right: 3rem;
-      display: flex;
-      gap: 3rem;
-      opacity: 0;
-      animation: fadeUp 0.8s ease forwards 1s;
+      position: absolute; bottom: 3rem; right: 3rem;
+      display: flex; gap: 3rem;
+      opacity: 0; animation: fadeUp 0.8s ease forwards 1s;
     }
-
-    .stat {
-      text-align: right;
-    }
-
-    .stat-num {
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: 2.5rem;
-      color: var(--sky);
-      line-height: 1;
-    }
-
-    .stat-label {
-      font-size: 0.62rem;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      color: var(--muted);
-      margin-top: 0.2rem;
-    }
+    .stat { text-align: right; }
+    .stat-num { font-family: 'Bebas Neue', sans-serif; font-size: 2.5rem; color: var(--sky); line-height: 1; }
+    .stat-label { font-size: 0.62rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); margin-top: 0.2rem; }
 
     /* TICKER */
-    .ticker {
-      background: var(--sky);
-      padding: 0.6rem 0;
-      overflow: hidden;
-      white-space: nowrap;
-    }
+    .ticker { background: var(--sky); padding: 0.6rem 0; overflow: hidden; white-space: nowrap; }
+    .ticker-inner { display: inline-block; animation: ticker 25s linear infinite; }
+    .ticker span { font-size: 0.65rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--black); font-weight: 400; padding: 0 3rem; }
+    .ticker span::before { content: '◆'; margin-right: 3rem; }
 
-    .ticker-inner {
-      display: inline-block;
-      animation: ticker 25s linear infinite;
+    /* LIVE GAME BANNER */
+    .game-banner {
+      background: var(--card);
+      border-bottom: 1px solid var(--sky-border);
+      padding: 1rem 3rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
     }
+    .game-info { display: flex; align-items: center; gap: 1.5rem; }
+    .game-live { display: flex; align-items: center; gap: 0.5rem; font-size: 0.62rem; letter-spacing: 0.2em; text-transform: uppercase; color: #ff4444; }
+    .game-live::before { content: ''; width: 6px; height: 6px; background: #ff4444; border-radius: 50%; animation: pulse 1.5s ease-in-out infinite; }
+    .game-title { font-family: 'Cormorant Garamond', serif; font-size: 1.1rem; color: var(--text); }
+    .game-collection { font-size: 0.62rem; letter-spacing: 0.12em; color: var(--sky); text-transform: uppercase; }
+    .game-progress { display: flex; align-items: center; gap: 1.5rem; }
+    .game-minted { font-size: 0.65rem; color: var(--muted); letter-spacing: 0.1em; }
+    .game-minted span { color: var(--sky); }
+    .mint-btn {
+      background: var(--sky); color: var(--black);
+      padding: 0.5rem 1.2rem;
+      font-family: 'DM Mono', monospace; font-size: 0.65rem;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      border: none; border-radius: 2px; cursor: pointer;
+      transition: background 0.2s;
+    }
+    .mint-btn:hover { background: var(--sky-light); }
 
-    .ticker span {
-      font-size: 0.65rem;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: var(--black);
-      font-weight: 400;
-      padding: 0 3rem;
-    }
-
-    .ticker span::before {
-      content: '◆';
-      margin-right: 3rem;
-    }
-
-    /* TODAY'S COLLECTION */
-    .section {
-      padding: 6rem 3rem;
-    }
+    /* SECTION */
+    .section { padding: 6rem 3rem; }
 
     .section-header {
-      display: flex;
-      align-items: flex-end;
-      justify-content: space-between;
+      display: flex; align-items: flex-end; justify-content: space-between;
       margin-bottom: 3rem;
       border-bottom: 1px solid var(--faint);
       padding-bottom: 1.5rem;
     }
-
-    .section-label {
-      font-size: 0.62rem;
-      letter-spacing: 0.25em;
-      text-transform: uppercase;
-      color: var(--sky);
-      margin-bottom: 0.5rem;
-    }
-
-    .section-title {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 2.8rem;
-      font-weight: 300;
-      color: var(--text);
-      line-height: 1.1;
-    }
-
-    .section-link {
-      font-size: 0.65rem;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      color: var(--sky);
-      text-decoration: none;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      transition: gap 0.2s;
-    }
-
+    .section-label { font-size: 0.62rem; letter-spacing: 0.25em; text-transform: uppercase; color: var(--sky); margin-bottom: 0.5rem; }
+    .section-title { font-family: 'Cormorant Garamond', serif; font-size: 2.8rem; font-weight: 300; color: var(--text); line-height: 1.1; }
+    .section-link { font-size: 0.65rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--sky); text-decoration: none; display: flex; align-items: center; gap: 0.5rem; transition: gap 0.2s; }
     .section-link:hover { gap: 0.8rem; }
 
-    /* COLLECTION GRID */
-    .collection-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 1px;
-      background: var(--faint);
-      border: 1px solid var(--faint);
-    }
+    /* NFT GRID */
+    .collection-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--faint); border: 1px solid var(--faint); }
 
-    .nft-card {
-      background: var(--card);
-      aspect-ratio: 1;
-      position: relative;
-      overflow: hidden;
-      cursor: pointer;
-      transition: transform 0.3s;
-    }
-
+    .nft-card { background: var(--card); aspect-ratio: 1; position: relative; overflow: hidden; cursor: pointer; transition: transform 0.3s; }
     .nft-card:hover { transform: scale(1.01); z-index: 1; }
 
-    .nft-card-img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: linear-gradient(135deg, var(--card) 0%, var(--card2) 100%);
-    }
+    .nft-media { width: 100%; height: 100%; object-fit: cover; }
 
     .nft-placeholder {
-      width: 100%;
-      height: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      width: 100%; height: 100%;
+      display: flex; align-items: center; justify-content: center;
       background: linear-gradient(135deg, #111620 0%, #0d1420 50%, #111825 100%);
       position: relative;
     }
-
     .nft-placeholder::after {
-      content: '';
-      position: absolute;
-      inset: 0;
+      content: ''; position: absolute; inset: 0;
       background: radial-gradient(circle at 50% 50%, rgba(107,173,232,0.08) 0%, transparent 60%);
     }
-
-    .nft-num {
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: 5rem;
-      color: rgba(107, 173, 232, 0.12);
-      letter-spacing: 0.05em;
-    }
+    .nft-num { font-family: 'Bebas Neue', sans-serif; font-size: 5rem; color: rgba(107, 173, 232, 0.12); letter-spacing: 0.05em; }
 
     .nft-card-info {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
+      position: absolute; bottom: 0; left: 0; right: 0;
       padding: 1.2rem;
       background: linear-gradient(transparent, rgba(8,10,14,0.95));
-      transform: translateY(30%);
-      transition: transform 0.3s;
+      transform: translateY(30%); transition: transform 0.3s;
     }
-
     .nft-card:hover .nft-card-info { transform: translateY(0); }
+    .nft-card-number { font-size: 0.6rem; letter-spacing: 0.2em; color: var(--sky); text-transform: uppercase; margin-bottom: 0.3rem; }
+    .nft-card-name { font-family: 'Cormorant Garamond', serif; font-size: 1.1rem; font-weight: 400; color: var(--text); margin-bottom: 0.8rem; }
+    .nft-card-price { font-size: 0.68rem; color: var(--muted); display: flex; justify-content: space-between; align-items: center; }
+    .nft-card-price span:last-child { color: var(--sky); font-weight: 400; }
 
-    .nft-card-number {
-      font-size: 0.6rem;
-      letter-spacing: 0.2em;
-      color: var(--sky);
-      text-transform: uppercase;
-      margin-bottom: 0.3rem;
-    }
+    /* LOADING STATE */
+    .loading-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--faint); border: 1px solid var(--faint); }
+    .loading-card { background: var(--card); aspect-ratio: 1; display: flex; align-items: center; justify-content: center; }
+    .loading-pulse { width: 40px; height: 40px; border-radius: 50%; background: var(--faint); animation: loadpulse 1.5s ease-in-out infinite; }
 
-    .nft-card-name {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 1.1rem;
-      font-weight: 400;
-      color: var(--text);
-      margin-bottom: 0.8rem;
-    }
+    .status-msg { text-align: center; padding: 3rem; font-size: 0.75rem; color: var(--muted); letter-spacing: 0.1em; }
 
-    .nft-card-price {
-      font-size: 0.68rem;
-      color: var(--muted);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .nft-card-price span:last-child {
-      color: var(--sky);
-      font-weight: 400;
-    }
-
-    /* DAILY COUNTER */
+    /* COUNTER */
     .counter-section {
-      padding: 4rem 3rem;
-      background: var(--card);
-      border-top: 1px solid var(--faint);
-      border-bottom: 1px solid var(--faint);
+      padding: 4rem 3rem; background: var(--card);
+      border-top: 1px solid var(--faint); border-bottom: 1px solid var(--faint);
     }
-
-    .counter-inner {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      max-width: 900px;
-      margin: 0 auto;
-    }
-
-    .counter-text .label {
-      font-size: 0.62rem;
-      letter-spacing: 0.25em;
-      text-transform: uppercase;
-      color: var(--sky);
-      margin-bottom: 0.5rem;
-    }
-
-    .counter-text .title {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 1.8rem;
-      font-weight: 300;
-      color: var(--text);
-    }
-
-    .counter-display {
-      display: flex;
-      gap: 1.5rem;
-      align-items: center;
-    }
-
-    .time-unit {
-      text-align: center;
-    }
-
-    .time-num {
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: 3.5rem;
-      color: var(--text);
-      line-height: 1;
-      display: block;
-    }
-
-    .time-label {
-      font-size: 0.58rem;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: var(--muted);
-      margin-top: 0.3rem;
-    }
-
-    .time-sep {
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: 3rem;
-      color: var(--faint);
-      padding-bottom: 0.5rem;
-    }
-
-    .counter-progress {
-      width: 200px;
-    }
-
-    .progress-label {
-      display: flex;
-      justify-content: space-between;
-      font-size: 0.62rem;
-      color: var(--muted);
-      margin-bottom: 0.5rem;
-      letter-spacing: 0.1em;
-    }
-
+    .counter-inner { display: flex; align-items: center; justify-content: space-between; max-width: 900px; margin: 0 auto; }
+    .counter-text .label { font-size: 0.62rem; letter-spacing: 0.25em; text-transform: uppercase; color: var(--sky); margin-bottom: 0.5rem; }
+    .counter-text .title { font-family: 'Cormorant Garamond', serif; font-size: 1.8rem; font-weight: 300; color: var(--text); }
+    .counter-display { display: flex; gap: 1.5rem; align-items: center; }
+    .time-unit { text-align: center; }
+    .time-num { font-family: 'Bebas Neue', sans-serif; font-size: 3.5rem; color: var(--text); line-height: 1; display: block; }
+    .time-label { font-size: 0.58rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); margin-top: 0.3rem; }
+    .time-sep { font-family: 'Bebas Neue', sans-serif; font-size: 3rem; color: var(--faint); padding-bottom: 0.5rem; }
+    .counter-progress { width: 200px; }
+    .progress-label { display: flex; justify-content: space-between; font-size: 0.62rem; color: var(--muted); margin-bottom: 0.5rem; letter-spacing: 0.1em; }
     .progress-label span:last-child { color: var(--sky); }
-
-    .progress-bar {
-      height: 3px;
-      background: var(--faint);
-      border-radius: 2px;
-      overflow: hidden;
-    }
-
-    .progress-fill {
-      height: 100%;
-      width: 34%;
-      background: var(--sky);
-      border-radius: 2px;
-      transition: width 1s ease;
-    }
+    .progress-bar { height: 3px; background: var(--faint); border-radius: 2px; overflow: hidden; }
+    .progress-fill { height: 100%; background: var(--sky); border-radius: 2px; transition: width 1s ease; }
 
     /* HOW IT WORKS */
-    .how-section {
-      padding: 6rem 3rem;
-      background: var(--dark);
-    }
+    .how-section { padding: 6rem 3rem; background: var(--dark); }
+    .steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; margin-top: 3rem; position: relative; }
+    .steps::before { content: ''; position: absolute; top: 2rem; left: 12.5%; right: 12.5%; height: 1px; background: linear-gradient(90deg, transparent, var(--sky-border), var(--sky-border), transparent); }
+    .step { padding: 2rem; text-align: center; position: relative; }
+    .step-num { width: 4rem; height: 4rem; border: 1px solid var(--sky-border); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Bebas Neue', sans-serif; font-size: 1.8rem; color: var(--sky); margin: 0 auto 1.5rem; background: var(--dark); position: relative; z-index: 1; transition: background 0.3s, border-color 0.3s; }
+    .step:hover .step-num { background: var(--sky-dim); border-color: var(--sky); }
+    .step-title { font-family: 'Cormorant Garamond', serif; font-size: 1.3rem; font-weight: 400; color: var(--text); margin-bottom: 0.8rem; }
+    .step-desc { font-size: 0.72rem; line-height: 1.7; color: var(--muted); letter-spacing: 0.02em; }
 
-    .steps {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 0;
-      margin-top: 3rem;
-      position: relative;
-    }
-
-    .steps::before {
-      content: '';
-      position: absolute;
-      top: 2rem;
-      left: 12.5%;
-      right: 12.5%;
-      height: 1px;
-      background: linear-gradient(90deg, transparent, var(--sky-border), var(--sky-border), transparent);
-    }
-
-    .step {
-      padding: 2rem;
-      text-align: center;
-      position: relative;
-    }
-
-    .step-num {
-      width: 4rem;
-      height: 4rem;
-      border: 1px solid var(--sky-border);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: 1.8rem;
-      color: var(--sky);
-      margin: 0 auto 1.5rem;
-      background: var(--dark);
-      position: relative;
-      z-index: 1;
-      transition: background 0.3s, border-color 0.3s;
-    }
-
-    .step:hover .step-num {
-      background: var(--sky-dim);
-      border-color: var(--sky);
-    }
-
-    .step-title {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 1.3rem;
-      font-weight: 400;
-      color: var(--text);
-      margin-bottom: 0.8rem;
-    }
-
-    .step-desc {
-      font-size: 0.72rem;
-      line-height: 1.7;
-      color: var(--muted);
-      letter-spacing: 0.02em;
-    }
-
-    /* MARKETPLACE PREVIEW */
+    /* MARKETPLACE */
     .marketplace-section { padding: 6rem 3rem; }
-
-    .listing-row {
-      display: grid;
-      grid-template-columns: auto 1fr auto auto auto;
-      align-items: center;
-      gap: 2rem;
-      padding: 1.2rem 1.5rem;
-      border: 1px solid var(--faint);
-      background: var(--card);
-      margin-bottom: 1px;
-      transition: border-color 0.2s, background 0.2s;
-      cursor: pointer;
-    }
-
-    .listing-row:hover {
-      border-color: var(--sky-border);
-      background: var(--card2);
-    }
-
-    .listing-thumb {
-      width: 48px;
-      height: 48px;
-      background: linear-gradient(135deg, var(--card2), var(--faint));
-      border-radius: 2px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: 1.1rem;
-      color: rgba(107,173,232,0.3);
-    }
-
-    .listing-name {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 1.1rem;
-      font-weight: 400;
-      color: var(--text);
-    }
-
-    .listing-collection {
-      font-size: 0.62rem;
-      letter-spacing: 0.12em;
-      color: var(--muted);
-      text-transform: uppercase;
-      margin-top: 0.2rem;
-    }
-
-    .listing-edition {
-      font-size: 0.65rem;
-      letter-spacing: 0.1em;
-      color: var(--sky);
-      text-align: right;
-    }
-
-    .listing-price {
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: 1.4rem;
-      color: var(--text);
-      text-align: right;
-      letter-spacing: 0.05em;
-    }
-
-    .listing-price-sub {
-      font-size: 0.6rem;
-      color: var(--muted);
-      text-align: right;
-      letter-spacing: 0.08em;
-    }
-
-    .listing-btn {
-      background: transparent;
-      border: 1px solid var(--sky-border);
-      color: var(--sky);
-      padding: 0.45rem 1rem;
-      font-family: 'DM Mono', monospace;
-      font-size: 0.62rem;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      cursor: pointer;
-      border-radius: 2px;
-      white-space: nowrap;
-      transition: background 0.2s;
-    }
-
+    .listing-row { display: grid; grid-template-columns: auto 1fr auto auto auto; align-items: center; gap: 2rem; padding: 1.2rem 1.5rem; border: 1px solid var(--faint); background: var(--card); margin-bottom: 1px; transition: border-color 0.2s, background 0.2s; cursor: pointer; }
+    .listing-row:hover { border-color: var(--sky-border); background: var(--card2); }
+    .listing-thumb { width: 48px; height: 48px; background: linear-gradient(135deg, var(--card2), var(--faint)); border-radius: 2px; display: flex; align-items: center; justify-content: center; font-family: 'Bebas Neue', sans-serif; font-size: 1.1rem; color: rgba(107,173,232,0.3); overflow: hidden; }
+    .listing-thumb img { width: 100%; height: 100%; object-fit: cover; }
+    .listing-name { font-family: 'Cormorant Garamond', serif; font-size: 1.1rem; font-weight: 400; color: var(--text); }
+    .listing-collection { font-size: 0.62rem; letter-spacing: 0.12em; color: var(--muted); text-transform: uppercase; margin-top: 0.2rem; }
+    .listing-edition { font-size: 0.65rem; letter-spacing: 0.1em; color: var(--sky); text-align: right; }
+    .listing-price { font-family: 'Bebas Neue', sans-serif; font-size: 1.4rem; color: var(--text); text-align: right; letter-spacing: 0.05em; }
+    .listing-price-sub { font-size: 0.6rem; color: var(--muted); text-align: right; letter-spacing: 0.08em; }
+    .listing-btn { background: transparent; border: 1px solid var(--sky-border); color: var(--sky); padding: 0.45rem 1rem; font-family: 'DM Mono', monospace; font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase; cursor: pointer; border-radius: 2px; white-space: nowrap; transition: background 0.2s; }
     .listing-btn:hover { background: var(--sky-dim); }
 
     /* APP SECTION */
-    .app-section {
-      padding: 6rem 3rem;
-      background: var(--card);
-      border-top: 1px solid var(--faint);
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 6rem;
-      align-items: center;
-    }
-
-    .app-text .overline {
-      font-size: 0.62rem;
-      letter-spacing: 0.25em;
-      text-transform: uppercase;
-      color: var(--sky);
-      margin-bottom: 1rem;
-    }
-
-    .app-text h2 {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 3rem;
-      font-weight: 300;
-      line-height: 1.15;
-      color: var(--text);
-      margin-bottom: 1.5rem;
-    }
-
-    .app-text p {
-      font-size: 0.75rem;
-      line-height: 1.8;
-      color: var(--muted);
-      margin-bottom: 2rem;
-      letter-spacing: 0.02em;
-    }
-
-    .app-badges {
-      display: flex;
-      gap: 1rem;
-    }
-
-    .app-badge {
-      display: flex;
-      align-items: center;
-      gap: 0.7rem;
-      padding: 0.7rem 1.3rem;
-      border: 1px solid var(--faint);
-      border-radius: 4px;
-      cursor: pointer;
-      transition: border-color 0.2s;
-      text-decoration: none;
-      color: var(--text);
-    }
-
+    .app-section { padding: 6rem 3rem; background: var(--card); border-top: 1px solid var(--faint); display: grid; grid-template-columns: 1fr 1fr; gap: 6rem; align-items: center; }
+    .app-text .overline { font-size: 0.62rem; letter-spacing: 0.25em; text-transform: uppercase; color: var(--sky); margin-bottom: 1rem; }
+    .app-text h2 { font-family: 'Cormorant Garamond', serif; font-size: 3rem; font-weight: 300; line-height: 1.15; color: var(--text); margin-bottom: 1.5rem; }
+    .app-text p { font-size: 0.75rem; line-height: 1.8; color: var(--muted); margin-bottom: 2rem; letter-spacing: 0.02em; }
+    .app-badges { display: flex; gap: 1rem; }
+    .app-badge { display: flex; align-items: center; gap: 0.7rem; padding: 0.7rem 1.3rem; border: 1px solid var(--faint); border-radius: 4px; cursor: pointer; transition: border-color 0.2s; text-decoration: none; color: var(--text); }
     .app-badge:hover { border-color: var(--sky-border); }
-
     .app-badge-icon { font-size: 1.5rem; }
-
     .app-badge-text .sub { font-size: 0.58rem; color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; }
     .app-badge-text .main { font-family: 'Cormorant Garamond', serif; font-size: 1rem; font-weight: 400; }
-
-    .app-visual {
-      display: flex;
-      justify-content: center;
-      gap: 1.5rem;
-      align-items: flex-end;
-    }
-
-    .phone-mock {
-      width: 160px;
-      height: 300px;
-      background: var(--dark);
-      border: 1px solid var(--faint);
-      border-radius: 24px;
-      overflow: hidden;
-      position: relative;
-      flex-shrink: 0;
-    }
-
-    .phone-mock:first-child {
-      transform: rotate(-3deg) translateY(20px);
-      opacity: 0.7;
-    }
-
-    .phone-mock:last-child {
-      transform: rotate(3deg) translateY(20px);
-      opacity: 0.7;
-    }
-
-    .phone-screen {
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(160deg, #0d1420 0%, #111825 100%);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 0.5rem;
-      padding: 1rem;
-    }
-
-    .phone-logo {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 0.9rem;
-      font-style: italic;
-      color: var(--sky);
-      letter-spacing: 0.05em;
-    }
-
-    .phone-nft {
-      width: 100%;
-      aspect-ratio: 1;
-      background: linear-gradient(135deg, var(--faint), var(--card2));
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: 2rem;
-      color: rgba(107,173,232,0.2);
-    }
-
-    .phone-mint {
-      width: 100%;
-      background: var(--sky);
-      color: var(--black);
-      text-align: center;
-      font-size: 0.6rem;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      padding: 0.5rem;
-      border-radius: 4px;
-      font-weight: 400;
-    }
+    .app-visual { display: flex; justify-content: center; gap: 1.5rem; align-items: flex-end; }
+    .phone-mock { width: 160px; height: 300px; background: var(--dark); border: 1px solid var(--faint); border-radius: 24px; overflow: hidden; position: relative; flex-shrink: 0; }
+    .phone-mock:first-child { transform: rotate(-3deg) translateY(20px); opacity: 0.7; }
+    .phone-mock:last-child { transform: rotate(3deg) translateY(20px); opacity: 0.7; }
+    .phone-screen { width: 100%; height: 100%; background: linear-gradient(160deg, #0d1420 0%, #111825 100%); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.5rem; padding: 1rem; }
+    .phone-logo { font-family: 'Cormorant Garamond', serif; font-size: 0.9rem; font-style: italic; color: var(--sky); letter-spacing: 0.05em; }
+    .phone-nft { width: 100%; aspect-ratio: 1; background: linear-gradient(135deg, var(--faint), var(--card2)); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-family: 'Bebas Neue', sans-serif; font-size: 2rem; color: rgba(107,173,232,0.2); }
+    .phone-mint { width: 100%; background: var(--sky); color: var(--black); text-align: center; font-size: 0.6rem; letter-spacing: 0.15em; text-transform: uppercase; padding: 0.5rem; border-radius: 4px; font-weight: 400; }
 
     /* FOOTER */
-    footer {
-      padding: 3rem;
-      border-top: 1px solid var(--faint);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .footer-logo {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 1.3rem;
-      font-weight: 300;
-      font-style: italic;
-      color: var(--muted);
-    }
-
+    footer { padding: 3rem; border-top: 1px solid var(--faint); display: flex; align-items: center; justify-content: space-between; }
+    .footer-logo { font-family: 'Cormorant Garamond', serif; font-size: 1.3rem; font-weight: 300; font-style: italic; color: var(--muted); }
     .footer-logo span { color: var(--sky); }
-
-    .footer-links {
-      display: flex;
-      gap: 2rem;
-      list-style: none;
-    }
-
-    .footer-links a {
-      font-size: 0.62rem;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--muted);
-      text-decoration: none;
-      transition: color 0.2s;
-    }
-
+    .footer-links { display: flex; gap: 2rem; list-style: none; }
+    .footer-links a { font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); text-decoration: none; transition: color 0.2s; }
     .footer-links a:hover { color: var(--sky); }
-
-    .footer-copy {
-      font-size: 0.62rem;
-      color: var(--faint);
-      letter-spacing: 0.08em;
-    }
+    .footer-copy { font-size: 0.62rem; color: var(--faint); letter-spacing: 0.08em; }
 
     /* ANIMATIONS */
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes ticker { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+    @keyframes loadpulse { 0%, 100% { opacity: 0.3; } 50% { opacity: 0.8; } }
 
-    @keyframes ticker {
-      from { transform: translateX(0); }
-      to { transform: translateX(-50%); }
-    }
-
-    /* SCROLLBAR */
     ::-webkit-scrollbar { width: 4px; }
     ::-webkit-scrollbar-track { background: var(--black); }
     ::-webkit-scrollbar-thumb { background: var(--faint); border-radius: 2px; }
-    ::-webkit-scrollbar-thumb:hover { background: var(--sky-border); }
   </style>
 </head>
 <body>
@@ -893,82 +350,59 @@
   <!-- HERO -->
   <section class="hero">
     <div class="hero-glow"></div>
-    <div class="hero-glow-2"></div>
-    <div class="hero-label">Daily Limited Edition NFTs · On Polygon</div>
-    <h1 class="hero-title">
-      OCTOBER-<br><span class="accent">SAN</span>
-    </h1>
+    <div class="hero-label">Live · On Polygon · In-Stadium NFT Experience</div>
+    <h1 class="hero-title">OCTOBER-<br><span class="accent">SAN</span></h1>
     <p class="hero-subtitle">Mint an October-San moment.</p>
-    <p class="hero-subtitle" style="font-size: clamp(1rem, 2vw, 1.4rem); margin-top: -1.5rem;">Every day, a new collection. Every moment, a new collectible. Limited by design.</p>
+    <p class="hero-subtitle-2">Every game a new collection. Every play a new collectible. Limited by design.</p>
     <div class="hero-actions">
       <a href="#collection" class="btn-primary">Today's Collection</a>
       <a href="#app" class="btn-secondary">Download the App</a>
     </div>
     <div class="hero-stats">
-      <div class="stat">
-        <div class="stat-num">1K</div>
-        <div class="stat-label">Daily Cap</div>
-      </div>
-      <div class="stat">
-        <div class="stat-num">5%</div>
-        <div class="stat-label">Creator Royalty</div>
-      </div>
-      <div class="stat">
-        <div class="stat-num">POL</div>
-        <div class="stat-label">Polygon Network</div>
-      </div>
+      <div class="stat"><div class="stat-num" id="hero-minted">—</div><div class="stat-label">Minted Today</div></div>
+      <div class="stat"><div class="stat-num">5%</div><div class="stat-label">Creator Royalty</div></div>
+      <div class="stat"><div class="stat-num">POL</div><div class="stat-label">Polygon Network</div></div>
     </div>
   </section>
 
   <!-- TICKER -->
   <div class="ticker">
     <div class="ticker-inner">
-      <span>Today's Collection Open</span>
-      <span>Mint Your Moment</span>
-      <span>Limited to 1,000 Daily</span>
-      <span>Trade on October-San</span>
+      <span>Every Game a New Collection</span>
+      <span>Every Play a New Collectible</span>
+      <span>Mint an October-San Moment</span>
+      <span>Limited Edition · In-Stadium</span>
       <span>5% Creator Royalties</span>
       <span>Powered by Polygon</span>
-      <span>Today's Collection Open</span>
-      <span>Mint Your Moment</span>
-      <span>Limited to 1,000 Daily</span>
-      <span>Trade on October-San</span>
+      <span>Every Game a New Collection</span>
+      <span>Every Play a New Collectible</span>
+      <span>Mint an October-San Moment</span>
+      <span>Limited Edition · In-Stadium</span>
       <span>5% Creator Royalties</span>
       <span>Powered by Polygon</span>
     </div>
   </div>
 
-  <!-- DAILY COUNTER -->
+  <!-- COUNTER -->
   <div class="counter-section">
     <div class="counter-inner">
       <div class="counter-text">
-        <div class="label">May 24, 2026 Collection</div>
-        <div class="title">Closes in</div>
+        <div class="label" id="collection-date">Loading collection...</div>
+        <div class="title">Collection closes in</div>
       </div>
       <div class="counter-display">
-        <div class="time-unit">
-          <span class="time-num" id="hours">--</span>
-          <div class="time-label">Hours</div>
-        </div>
+        <div class="time-unit"><span class="time-num" id="hours">--</span><div class="time-label">Hours</div></div>
         <div class="time-sep">:</div>
-        <div class="time-unit">
-          <span class="time-num" id="minutes">--</span>
-          <div class="time-label">Minutes</div>
-        </div>
+        <div class="time-unit"><span class="time-num" id="minutes">--</span><div class="time-label">Minutes</div></div>
         <div class="time-sep">:</div>
-        <div class="time-unit">
-          <span class="time-num" id="seconds">--</span>
-          <div class="time-label">Seconds</div>
-        </div>
+        <div class="time-unit"><span class="time-num" id="seconds">--</span><div class="time-label">Seconds</div></div>
       </div>
       <div class="counter-progress">
         <div class="progress-label">
-          <span>Minted Today</span>
-          <span id="minted-count">340 / 1,000</span>
+          <span>Minted</span>
+          <span id="minted-count">— / 1,000</span>
         </div>
-        <div class="progress-bar">
-          <div class="progress-fill" id="progress-fill"></div>
-        </div>
+        <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
       </div>
     </div>
   </div>
@@ -977,52 +411,27 @@
   <section class="section" id="collection">
     <div class="section-header">
       <div>
-        <div class="section-label">May 24, 2026</div>
+        <div class="section-label" id="collection-label">Loading...</div>
         <h2 class="section-title">Today's Collection</h2>
       </div>
-      <a href="#" class="section-link">View all 340 NFTs →</a>
+      <a href="#marketplace" class="section-link">View all in marketplace →</a>
     </div>
-    <div class="collection-grid">
-      <div class="nft-card">
-        <div class="nft-placeholder"><div class="nft-num">001</div></div>
-        <div class="nft-card-info">
-          <div class="nft-card-number">#1 of 1,000 · May 24</div>
-          <div class="nft-card-name">Genesis Moment</div>
-          <div class="nft-card-price"><span>0 POL</span><span>Buy Now</span></div>
-        </div>
-      </div>
-      <div class="nft-card">
-        <div class="nft-placeholder"><div class="nft-num">047</div></div>
-        <div class="nft-card-info">
-          <div class="nft-card-number">#47 of 1,000 · May 24</div>
-          <div class="nft-card-name">Untitled No. 47</div>
-          <div class="nft-card-price"><span>2.5 POL</span><span>Buy Now</span></div>
-        </div>
-      </div>
-      <div class="nft-card">
-        <div class="nft-placeholder"><div class="nft-num">112</div></div>
-        <div class="nft-card-info">
-          <div class="nft-card-number">#112 of 1,000 · May 24</div>
-          <div class="nft-card-name">Untitled No. 112</div>
-          <div class="nft-card-price"><span>1.8 POL</span><span>Buy Now</span></div>
-        </div>
-      </div>
-      <div class="nft-card">
-        <div class="nft-placeholder"><div class="nft-num">340</div></div>
-        <div class="nft-card-info">
-          <div class="nft-card-number">#340 of 1,000 · May 24</div>
-          <div class="nft-card-name">Untitled No. 340</div>
-          <div class="nft-card-price"><span>3.2 POL</span><span>Buy Now</span></div>
-        </div>
+    <div id="nft-grid">
+      <div class="loading-grid">
+        <div class="loading-card"><div class="loading-pulse"></div></div>
+        <div class="loading-card"><div class="loading-pulse"></div></div>
+        <div class="loading-card"><div class="loading-pulse"></div></div>
+        <div class="loading-card"><div class="loading-pulse"></div></div>
       </div>
     </div>
+    <div id="nft-status"></div>
   </section>
 
   <!-- HOW IT WORKS -->
   <section class="how-section" id="how">
     <div class="section-header" style="border-bottom-color: var(--faint);">
       <div>
-        <div class="section-label">The Process</div>
+        <div class="section-label">The In-Stadium Experience</div>
         <h2 class="section-title">How It Works</h2>
       </div>
     </div>
@@ -1030,22 +439,22 @@
       <div class="step">
         <div class="step-num">1</div>
         <div class="step-title">Open the App</div>
-        <div class="step-desc">Download October-San on iOS or Android. Create your wallet in seconds.</div>
+        <div class="step-desc">Download October-San. You're at the game. The collection is live.</div>
       </div>
       <div class="step">
         <div class="step-num">2</div>
-        <div class="step-title">Capture Your Moment</div>
-        <div class="step-desc">Take a photo or video directly in the app. Any moment is worth collecting.</div>
+        <div class="step-title">Capture the Moment</div>
+        <div class="step-desc">Take a photo or video of the play, the crowd, the moment. Anything.</div>
       </div>
       <div class="step">
         <div class="step-num">3</div>
         <div class="step-title">Mint Your NFT</div>
-        <div class="step-desc">Your NFT is numbered within today's collection. Limited to 1,000 per day.</div>
+        <div class="step-desc">Your NFT is numbered within this game's collection. Limited. Permanent.</div>
       </div>
       <div class="step">
         <div class="step-num">4</div>
         <div class="step-title">Collect & Trade</div>
-        <div class="step-desc">List it on the marketplace. Buy, sell, and trade with collectors worldwide.</div>
+        <div class="step-desc">List it. Sell it. Trade with fans worldwide. 5% royalty forever.</div>
       </div>
     </div>
   </section>
@@ -1054,98 +463,30 @@
   <section class="marketplace-section" id="marketplace">
     <div class="section-header">
       <div>
-        <div class="section-label">Live Listings</div>
+        <div class="section-label">Live on Polygon</div>
         <h2 class="section-title">Marketplace</h2>
       </div>
-      <a href="#" class="section-link">Browse all listings →</a>
+      <a href="#" class="section-link">Browse all →</a>
     </div>
-    <div class="listing-row">
-      <div class="listing-thumb">001</div>
-      <div>
-        <div class="listing-name">Genesis Moment</div>
-        <div class="listing-collection">May 24, 2026 Collection</div>
-      </div>
-      <div class="listing-edition">#1 of 1,000</div>
-      <div>
-        <div class="listing-price">12.0 POL</div>
-        <div class="listing-price-sub">≈ $4.20 USD</div>
-      </div>
-      <button class="listing-btn">Buy Now</button>
-    </div>
-    <div class="listing-row">
-      <div class="listing-thumb">047</div>
-      <div>
-        <div class="listing-name">Untitled No. 47</div>
-        <div class="listing-collection">May 24, 2026 Collection</div>
-      </div>
-      <div class="listing-edition">#47 of 1,000</div>
-      <div>
-        <div class="listing-price">2.5 POL</div>
-        <div class="listing-price-sub">≈ $0.88 USD</div>
-      </div>
-      <button class="listing-btn">Buy Now</button>
-    </div>
-    <div class="listing-row">
-      <div class="listing-thumb">112</div>
-      <div>
-        <div class="listing-name">Untitled No. 112</div>
-        <div class="listing-collection">May 24, 2026 Collection</div>
-      </div>
-      <div class="listing-edition">#112 of 1,000</div>
-      <div>
-        <div class="listing-price">1.8 POL</div>
-        <div class="listing-price-sub">≈ $0.63 USD</div>
-      </div>
-      <button class="listing-btn">Buy Now</button>
-    </div>
-    <div class="listing-row">
-      <div class="listing-thumb">003</div>
-      <div>
-        <div class="listing-name">Early Morning</div>
-        <div class="listing-collection">May 23, 2026 Collection</div>
-      </div>
-      <div class="listing-edition">#3 of 500</div>
-      <div>
-        <div class="listing-price">8.0 POL</div>
-        <div class="listing-price-sub">≈ $2.80 USD</div>
-      </div>
-      <button class="listing-btn">Buy Now</button>
-    </div>
-    <div class="listing-row">
-      <div class="listing-thumb">340</div>
-      <div>
-        <div class="listing-name">Untitled No. 340</div>
-        <div class="listing-collection">May 24, 2026 Collection</div>
-      </div>
-      <div class="listing-edition">#340 of 1,000</div>
-      <div>
-        <div class="listing-price">3.2 POL</div>
-        <div class="listing-price-sub">≈ $1.12 USD</div>
-      </div>
-      <button class="listing-btn">Buy Now</button>
+    <div id="marketplace-listings">
+      <div class="status-msg">Loading marketplace listings...</div>
     </div>
   </section>
 
   <!-- APP SECTION -->
   <section class="app-section" id="app">
     <div class="app-text">
-      <div class="overline">Available Now</div>
-      <h2>Mint your first NFT in under 60 seconds.</h2>
-      <p>Open the app, take a photo or video, and mint. Your NFT is numbered within today's collection — a timestamp on the blockchain, yours forever. No crypto experience required.</p>
+      <div class="overline">Coming Soon · iOS & Android</div>
+      <h2>Mint your moment from the stands.</h2>
+      <p>You're at the game. The collection is live. Open October-San, capture the play, and mint. Your NFT is numbered within this game's collection — a timestamp on the blockchain, yours forever.</p>
       <div class="app-badges">
         <a href="#" class="app-badge">
           <div class="app-badge-icon">🍎</div>
-          <div class="app-badge-text">
-            <div class="sub">Download on the</div>
-            <div class="main">App Store</div>
-          </div>
+          <div class="app-badge-text"><div class="sub">Download on the</div><div class="main">App Store</div></div>
         </a>
         <a href="#" class="app-badge">
           <div class="app-badge-icon">▶</div>
-          <div class="app-badge-text">
-            <div class="sub">Get it on</div>
-            <div class="main">Google Play</div>
-          </div>
+          <div class="app-badge-text"><div class="sub">Get it on</div><div class="main">Google Play</div></div>
         </a>
       </div>
     </div>
@@ -1163,7 +504,7 @@
           <div class="phone-logo">October-San™</div>
           <div class="phone-nft" style="font-size:2.5rem;">◉</div>
           <div style="font-size:0.55rem; color: var(--sky); letter-spacing:0.1em; text-align:center; margin-top:-0.3rem;">CAPTURE MOMENT</div>
-          <div style="font-size:0.52rem; color: var(--muted); letter-spacing:0.08em; text-align:center; line-height:1.6;">May 24, 2026<br>340 / 1,000 minted</div>
+          <div style="font-size:0.52rem; color: var(--muted); letter-spacing:0.08em; text-align:center; line-height:1.6;">Game Collection Live<br><span id="phone-minted">— minted</span></div>
           <div class="phone-mint">Take Photo & Mint</div>
         </div>
       </div>
@@ -1191,7 +532,13 @@
   </footer>
 
   <script>
-    // Countdown to midnight
+    // ─── CONFIG ───────────────────────────────────────────────
+    const CLIENT_ID = 'fb1460b2756706cc08a4f650e68fd526';
+    const CONTRACT_ADDRESS = '0x36aF73AbABEf8d9DEFfDc29509aeACc3a3c4b164';
+    const CHAIN_ID = 137; // Polygon Mainnet
+    const DAILY_CAP = 1000;
+
+    // ─── COUNTDOWN ────────────────────────────────────────────
     function updateCountdown() {
       const now = new Date();
       const midnight = new Date();
@@ -1207,16 +554,149 @@
     updateCountdown();
     setInterval(updateCountdown, 1000);
 
-    // Animate progress bar on scroll
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(e => {
-        if (e.isIntersecting) {
-          document.getElementById('progress-fill').style.width = '34%';
+    // ─── DATE DISPLAY ─────────────────────────────────────────
+    const today = new Date();
+    const dateStr = today.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+    document.getElementById('collection-date').textContent = dateStr + ' Collection';
+    document.getElementById('collection-label').textContent = dateStr;
+
+    // ─── FETCH NFTs FROM THIRDWEB ─────────────────────────────
+    async function loadNFTs() {
+      try {
+        const response = await fetch(
+          `https://contract.thirdweb.com/v1/nfts?contractAddress=${CONTRACT_ADDRESS}&chain=${CHAIN_ID}&limit=8`,
+          {
+            headers: {
+              'x-client-id': CLIENT_ID,
+              'Content-Type': 'application/json'
+            }
+          }
+        );
+
+        if (!response.ok) throw new Error('API error');
+        const data = await response.json();
+        const nfts = data.result || data.nfts || data || [];
+
+        if (!Array.isArray(nfts) || nfts.length === 0) {
+          showEmptyState();
+          return;
         }
-      });
-    });
-    const counter = document.querySelector('.counter-section');
-    if (counter) observer.observe(counter);
+
+        renderNFTs(nfts);
+        updateStats(nfts.length);
+
+      } catch (err) {
+        console.log('Thirdweb fetch note:', err.message);
+        showEmptyState();
+      }
+    }
+
+    function renderNFTs(nfts) {
+      const grid = document.getElementById('nft-grid');
+      const display = nfts.slice(0, 4);
+
+      grid.innerHTML = `<div class="collection-grid">${display.map((nft, i) => {
+        const id = nft.id || nft.tokenId || (i + 1);
+        const name = nft.metadata?.name || nft.name || `October-San #${id}`;
+        const image = nft.metadata?.image || nft.image || null;
+        const supply = nft.supply || 1;
+
+        return `
+          <div class="nft-card">
+            ${image
+              ? `<img class="nft-media" src="${image}" alt="${name}" onerror="this.parentElement.querySelector('.nft-placeholder') && (this.style.display='none')">`
+              : `<div class="nft-placeholder"><div class="nft-num">${String(id).padStart(3,'0')}</div></div>`
+            }
+            <div class="nft-card-info">
+              <div class="nft-card-number">#${id} · ${dateStr}</div>
+              <div class="nft-card-name">${name}</div>
+              <div class="nft-card-price"><span>OCTSN</span><span>Collect</span></div>
+            </div>
+          </div>`;
+      }).join('')}</div>`;
+
+      // Marketplace listings
+      const listings = document.getElementById('marketplace-listings');
+      listings.innerHTML = nfts.slice(0, 5).map((nft, i) => {
+        const id = nft.id || nft.tokenId || (i + 1);
+        const name = nft.metadata?.name || nft.name || `October-San #${id}`;
+        const image = nft.metadata?.image || null;
+
+        return `
+          <div class="listing-row">
+            <div class="listing-thumb">
+              ${image ? `<img src="${image}" alt="${name}">` : String(id).padStart(3,'0')}
+            </div>
+            <div>
+              <div class="listing-name">${name}</div>
+              <div class="listing-collection">${dateStr} Collection</div>
+            </div>
+            <div class="listing-edition">#${id} of ${DAILY_CAP.toLocaleString()}</div>
+            <div>
+              <div class="listing-price">— POL</div>
+              <div class="listing-price-sub">Make offer</div>
+            </div>
+            <button class="listing-btn">View</button>
+          </div>`;
+      }).join('');
+    }
+
+    function showEmptyState() {
+      const grid = document.getElementById('nft-grid');
+      grid.innerHTML = `
+        <div class="collection-grid">
+          <div class="nft-card">
+            <div class="nft-placeholder"><div class="nft-num">001</div></div>
+            <div class="nft-card-info">
+              <div class="nft-card-number">#1 of 1,000 · ${dateStr}</div>
+              <div class="nft-card-name">Genesis Moment</div>
+              <div class="nft-card-price"><span>Be first to mint</span><span>→</span></div>
+            </div>
+          </div>
+          <div class="nft-card">
+            <div class="nft-placeholder"><div class="nft-num">—</div></div>
+            <div class="nft-card-info">
+              <div class="nft-card-number">Today's Collection Open</div>
+              <div class="nft-card-name">Your Moment Here</div>
+              <div class="nft-card-price"><span>Mint via app</span><span>↓</span></div>
+            </div>
+          </div>
+          <div class="nft-card">
+            <div class="nft-placeholder"><div class="nft-num">—</div></div>
+            <div class="nft-card-info">
+              <div class="nft-card-number">Limited to 1,000</div>
+              <div class="nft-card-name">Every Game. Every Moment.</div>
+              <div class="nft-card-price"><span>On Polygon</span><span>◆</span></div>
+            </div>
+          </div>
+          <div class="nft-card">
+            <div class="nft-placeholder"><div class="nft-num">—</div></div>
+            <div class="nft-card-info">
+              <div class="nft-card-number">App Coming Soon</div>
+              <div class="nft-card-name">Mint an October-San Moment</div>
+              <div class="nft-card-price"><span>iOS & Android</span><span>↓</span></div>
+            </div>
+          </div>
+        </div>`;
+
+      document.getElementById('marketplace-listings').innerHTML = `
+        <div class="status-msg">
+          The marketplace is live on Polygon.<br>
+          <span style="color: var(--sky);">Mint the first October-San NFT to get started.</span>
+        </div>`;
+    }
+
+    function updateStats(count) {
+      const pct = Math.min((count / DAILY_CAP) * 100, 100);
+      document.getElementById('minted-count').textContent = `${count} / ${DAILY_CAP.toLocaleString()}`;
+      document.getElementById('progress-fill').style.width = pct + '%';
+      document.getElementById('hero-minted').textContent = count;
+      const phoneMinted = document.getElementById('phone-minted');
+      if (phoneMinted) phoneMinted.textContent = `${count} minted`;
+    }
+
+    // Load NFTs on page load
+    loadNFTs();
   </script>
 </body>
 </html>
