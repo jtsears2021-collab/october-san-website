@@ -8,9 +8,10 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { tokenId, price, wallet } = req.body;
+    const { tokenId, price, wallet, authToken } = req.body;
     
     const CLIENT_ID = process.env.THIRDWEB_CLIENT_ID;
+    const SECRET_KEY = process.env.THIRDWEB_SECRET_KEY;
     const ADMIN_PRIVATE_KEY = process.env.ADMIN_PRIVATE_KEY;
     const CONTRACT_ADDRESS = '0x397160Ad067BaaBa7f35Dd0b7A5C25F836b2539F';
     const MARKETPLACE_ADDRESS = '0xef77CDF9Dc521563270B6aBba379dbc3d389C08c';
@@ -23,7 +24,6 @@ export default async function handler(req, res) {
 
     const adminWallet = new ethers.Wallet(ADMIN_PRIVATE_KEY, provider);
 
-    // Check NFT ownership
     const nftAbi = [
       'function balanceOf(address account, uint256 id) view returns (uint256)',
       'function isApprovedForAll(address owner, address operator) view returns (bool)',
@@ -37,26 +37,68 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'You do not own this NFT' });
     }
 
-    // Check if marketplace is approved
     const isApproved = await nftContract.isApprovedForAll(wallet, MARKETPLACE_ADDRESS);
     
     if (!isApproved) {
-      // Need user to approve — return special response
-      return res.status(200).json({ 
-        success: false, 
-        needsApproval: true,
-        message: 'Marketplace approval needed'
-      });
+      // Use Thirdweb API to send approval transaction as user
+      const feeData = await provider.getFeeData();
+      const maxFeePerGas = feeData.maxFeePerGas.mul(3);
+      const maxPriorityFeePerGas = feeData.maxPriorityFeePerGas.lt(ethers.utils.parseUnits('30', 'gwei'))
+        ? ethers.utils.parseUnits('30', 'gwei')
+        : feeData.maxPriorityFeePerGas.mul(2);
+
+      const nftWithSigner = new ethers.Contract(CONTRACT_ADDRESS, nftAbi, adminWallet);
+      
+      // Get approval tx data
+      const approvalData = nftWithSigner.interface.encodeFunctionData('setApprovalForAll', [
+        MARKETPLACE_ADDRESS, true
+      ]);
+
+      // Send via Thirdweb engine on behalf of user
+      const approvalResponse = await fetch(
+        `https://api.thirdweb.com/v1/wallets/embedded/send-transaction`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-client-id': CLIENT_ID,
+            'x-secret-key': SECRET_KEY,
+            'Authorization': `Bearer ${authToken}`,
+          },
+          body: JSON.stringify({
+            walletAddress: wallet,
+            chainId: '137',
+            transaction: {
+              to: CONTRACT_ADDRESS,
+              data: approvalData,
+              value: '0',
+              maxFeePerGas: maxFeePerGas.toString(),
+              maxPriorityFeePerGas: maxPriorityFeePerGas.toString(),
+              gasLimit: '100000',
+            }
+          }),
+        }
+      );
+      
+      const approvalResult = await approvalResponse.json();
+      console.log('Approval result:', JSON.stringify(approvalResult).substring(0, 200));
+      
+      if (approvalResult.error) {
+        return res.status(500).json({ error: 'Approval failed: ' + approvalResult.error });
+      }
+      
+      // Wait a few seconds for approval to confirm
+      await new Promise(r => setTimeout(r, 5000));
     }
 
-    // Create listing
+    // Create listing with admin wallet
     const feeData = await provider.getFeeData();
     const maxFeePerGas = feeData.maxFeePerGas.mul(3);
     const maxPriorityFeePerGas = feeData.maxPriorityFeePerGas.lt(ethers.utils.parseUnits('30', 'gwei'))
       ? ethers.utils.parseUnits('30', 'gwei')
       : feeData.maxPriorityFeePerGas.mul(2);
 
-    const priceInWei = ethers.utils.parseEther(parseFloat(price) / 0.07 + '');
+    const priceInWei = ethers.utils.parseEther((parseFloat(price) / 0.07).toFixed(6));
 
     const marketAbi = [
       'function createListing(tuple(address assetContract, uint256 tokenId, uint256 quantity, address currency, uint256 pricePerToken, uint128 startTimestamp, uint128 endTimestamp, bool reserved) params) external returns (uint256 listingId)',
