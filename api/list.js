@@ -1,3 +1,11 @@
+export default async function handler(req, res) {
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
+
+  console.log('Request body:', JSON.stringify(req.body).substring(0, 200));
+  
+  const { tokenId, priceInPOL, authToken, walletAddress } = req.body;
 export const config = {
   maxDuration: 60,
   api: {
