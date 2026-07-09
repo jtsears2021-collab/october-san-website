@@ -1,5 +1,3 @@
-import { ethers } from 'ethers';
-
 export const config = {
   maxDuration: 60,
 };
@@ -12,77 +10,73 @@ export default async function handler(req, res) {
   try {
     const { tokenId, price, wallet } = req.body;
     
-    const CLIENT_ID = process.env.THIRDWEB_CLIENT_ID;
-    const ADMIN_PRIVATE_KEY = process.env.ADMIN_PRIVATE_KEY;
+    const SECRET_KEY = process.env.THIRDWEB_SECRET_KEY;
     const CONTRACT_ADDRESS = '0x397160Ad067BaaBa7f35Dd0b7A5C25F836b2539F';
     const MARKETPLACE_ADDRESS = '0xef77CDF9Dc521563270B6aBba379dbc3d389C08c';
+    const SERVER_WALLET = '0x9B8f624f2821F98E1D0cC745Ec26B487e585204b';
     
-    const provider = new ethers.providers.JsonRpcProvider(
-      `https://137.rpc.thirdweb.com/${CLIENT_ID}`
-    );
-
-    const adminWallet = new ethers.Wallet(ADMIN_PRIVATE_KEY, provider);
-
-    const nftAbi = [
-      'function balanceOf(address account, uint256 id) view returns (uint256)',
-      'function isApprovedForAll(address owner, address operator) view returns (bool)',
-      'function setApprovalForAll(address operator, bool approved) external',
-    ];
-    
-    const nftContract = new ethers.Contract(CONTRACT_ADDRESS, nftAbi, provider);
-    const balance = await nftContract.balanceOf(wallet, tokenId);
-    
-    if (balance.eq(0)) {
-      return res.status(400).json({ error: 'You do not own this NFT' });
-    }
-
-    const isApproved = await nftContract.isApprovedForAll(wallet, MARKETPLACE_ADDRESS);
-    console.log('Is approved:', isApproved);
-    
-    if (!isApproved) {
-      const nftWithAdmin = new ethers.Contract(CONTRACT_ADDRESS, nftAbi, adminWallet);
-      const feeData = await provider.getFeeData();
-      const approveTx = await nftWithAdmin.setApprovalForAll(MARKETPLACE_ADDRESS, true, {
-        maxFeePerGas: feeData.maxFeePerGas.mul(3),
-        maxPriorityFeePerGas: feeData.maxPriorityFeePerGas.lt(ethers.utils.parseUnits('30', 'gwei'))
-          ? ethers.utils.parseUnits('30', 'gwei')
-          : feeData.maxPriorityFeePerGas.mul(2),
-        gasLimit: 100000,
-      });
-      await approveTx.wait();
-      console.log('Approved!');
-    }
-
-    const feeData = await provider.getFeeData();
-    const priceInWei = ethers.utils.parseEther((parseFloat(price) / 0.07).toFixed(6));
+    const priceInPOL = (parseFloat(price) / 0.07).toFixed(6);
+    const priceInWei = BigInt(Math.floor(parseFloat(priceInPOL) * 1e18)).toString();
     const now = Math.floor(Date.now() / 1000);
+    const endTime = now + (7 * 24 * 60 * 60);
 
-    const marketAbi = [
-      'function createListing(tuple(address assetContract, uint256 tokenId, uint256 quantity, address currency, uint256 pricePerToken, uint128 startTimestamp, uint128 endTimestamp, bool reserved) params) external returns (uint256 listingId)',
-    ];
+    // First approve marketplace via Engine
+    const approveResponse = await fetch('https://engine.thirdweb.com/v1/write/transaction', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-secret-key': SECRET_KEY,
+      },
+      body: JSON.stringify({
+        chainId: '137',
+        from: SERVER_WALLET,
+        to: CONTRACT_ADDRESS,
+        abi: [{"inputs":[{"name":"operator","type":"address"},{"name":"approved","type":"bool"}],"name":"setApprovalForAll","outputs":[],"stateMutability":"nonpayable","type":"function"}],
+        functionName: 'setApprovalForAll',
+        args: [MARKETPLACE_ADDRESS, true],
+      }),
+    });
     
-    const marketplace = new ethers.Contract(MARKETPLACE_ADDRESS, marketAbi, adminWallet);
-    
-    const tx = await marketplace.createListing({
-      assetContract: CONTRACT_ADDRESS,
-      tokenId,
-      quantity: 1,
-      currency: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',
-      pricePerToken: priceInWei,
-      startTimestamp: now,
-      endTimestamp: now + (7 * 24 * 60 * 60),
-      reserved: false,
-    }, {
-      maxFeePerGas: feeData.maxFeePerGas.mul(3),
-      maxPriorityFeePerGas: feeData.maxPriorityFeePerGas.lt(ethers.utils.parseUnits('30', 'gwei'))
-        ? ethers.utils.parseUnits('30', 'gwei')
-        : feeData.maxPriorityFeePerGas.mul(2),
-      gasLimit: 500000,
+    const approveData = await approveResponse.json();
+    console.log('Approve response:', JSON.stringify(approveData).substring(0, 200));
+
+    // Wait for approval
+    await new Promise(r => setTimeout(r, 8000));
+
+    // Create listing via Engine
+    const listResponse = await fetch('https://engine.thirdweb.com/v1/write/transaction', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-secret-key': SECRET_KEY,
+      },
+      body: JSON.stringify({
+        chainId: '137',
+        from: SERVER_WALLET,
+        to: MARKETPLACE_ADDRESS,
+        abi: [{"inputs":[{"components":[{"name":"assetContract","type":"address"},{"name":"tokenId","type":"uint256"},{"name":"quantity","type":"uint256"},{"name":"currency","type":"address"},{"name":"pricePerToken","type":"uint256"},{"name":"startTimestamp","type":"uint128"},{"name":"endTimestamp","type":"uint128"},{"name":"reserved","type":"bool"}],"name":"params","type":"tuple"}],"name":"createListing","outputs":[{"name":"listingId","type":"uint256"}],"stateMutability":"nonpayable","type":"function"}],
+        functionName: 'createListing',
+        args: [{
+          assetContract: CONTRACT_ADDRESS,
+          tokenId: tokenId.toString(),
+          quantity: '1',
+          currency: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',
+          pricePerToken: priceInWei,
+          startTimestamp: now.toString(),
+          endTimestamp: endTime.toString(),
+          reserved: false,
+        }],
+      }),
     });
 
-    await tx.wait();
-    
-    return res.status(200).json({ success: true, txHash: tx.hash });
+    const listData = await listResponse.json();
+    console.log('List response:', JSON.stringify(listData).substring(0, 200));
+
+    if (listData.error) {
+      return res.status(500).json({ error: listData.error });
+    }
+
+    return res.status(200).json({ success: true, data: listData });
 
   } catch (err) {
     console.error('List error:', err.message);
