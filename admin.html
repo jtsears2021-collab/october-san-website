@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>October-San Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Mono:wght@300;400&family=Bebas+Neue&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --sky: #6BADE8;
+      --black: #080A0E;
+      --dark: #0D1117;
+      --card: #111620;
+      --text: #E8EDF5;
+      --muted: #6B7A99;
+      --faint: #2A3347;
+      --red: #E86B6B;
+      --green: #6BE8A0;
+    }
+    body {
+      background: var(--black);
+      color: var(--text);
+      font-family: 'DM Mono', monospace;
+      font-size: 13px;
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    /* LOGIN */
+    #login-screen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 2rem;
+    }
+    #login-screen .logo {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 2rem;
+      font-style: italic;
+      margin-bottom: 0.5rem;
+    }
+    #login-screen .logo span { color: var(--sky); }
+    #login-screen .badge {
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      color: var(--muted);
+      margin-bottom: 2rem;
+    }
+    #login-screen input {
+      background: var(--card);
+      border: 1px solid var(--faint);
+      border-radius: 4px;
+      color: var(--text);
+      font-family: 'DM Mono', monospace;
+      font-size: 13px;
+      padding: 14px 16px;
+      width: 100%;
+      max-width: 320px;
+      margin-bottom: 12px;
+      outline: none;
+    }
+    #login-screen input:focus { border-color: var(--sky); }
+    #login-screen button {
+      background: var(--sky);
+      border: none;
+      border-radius: 4px;
+      color: var(--black);
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      padding: 14px;
+      width: 100%;
+      max-width: 320px;
+      cursor: pointer;
+    }
+    #login-error {
+      color: var(--red);
+      font-size: 11px;
+      margin-top: 8px;
+      display: none;
+    }
+
+    /* MAIN */
+    #main-screen { display: none; }
+    
+    nav {
+      padding: 1.2rem 1.5rem;
+      border-bottom: 1px solid var(--faint);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      background: var(--black);
+      z-index: 100;
+    }
+    .nav-logo {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.2rem;
+      font-style: italic;
+    }
+    .nav-logo span { color: var(--sky); }
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .nav-badge {
+      font-size: 0.6rem;
+      letter-spacing: 0.2em;
+      color: var(--muted);
+      background: var(--card);
+      padding: 4px 8px;
+      border-radius: 2px;
+      border: 1px solid var(--faint);
+    }
+    .logout-btn {
+      background: none;
+      border: 1px solid var(--faint);
+      border-radius: 4px;
+      color: var(--muted);
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 1px;
+      padding: 6px 12px;
+      cursor: pointer;
+    }
+    .logout-btn:hover { color: var(--text); border-color: var(--text); }
+
+    main { max-width: 900px; margin: 0 auto; padding: 2rem 1.5rem; }
+
+    /* LIVE STATUS BAR */
+    .status-bar {
+      background: var(--card);
+      border: 1px solid var(--faint);
+      border-radius: 4px;
+      padding: 1.2rem 1.5rem;
+      margin-bottom: 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .status-left { display: flex; align-items: center; gap: 1rem; }
+    .status-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--muted);
+    }
+    .status-dot.open { background: var(--green); box-shadow: 0 0 8px var(--green); animation: pulse 2s infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+    .status-label { font-size: 0.75rem; letter-spacing: 0.15em; }
+    .status-label.open { color: var(--green); }
+    .status-label.closed { color: var(--muted); }
+    .status-game { color: var(--text); font-size: 0.9rem; }
+    .status-right { display: flex; align-items: center; gap: 1.5rem; }
+    .status-stat { text-align: right; }
+    .status-stat-num { color: var(--sky); font-size: 1.4rem; font-family: 'Bebas Neue', sans-serif; letter-spacing: 0.1em; }
+    .status-stat-label { color: var(--muted); font-size: 0.6rem; letter-spacing: 0.2em; }
+
+    /* TOGGLE */
+    .toggle-section {
+      background: var(--card);
+      border: 1px solid var(--faint);
+      border-radius: 4px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .toggle-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.5rem;
+    }
+    .toggle-title { font-size: 0.75rem; letter-spacing: 0.2em; color: var(--muted); }
+    .toggle-switch {
+      position: relative;
+      width: 56px;
+      height: 28px;
+    }
+    .toggle-switch input { opacity: 0; width: 0; height: 0; }
+    .toggle-slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: var(--faint);
+      border-radius: 28px;
+      transition: 0.3s;
+    }
+    .toggle-slider:before {
+      position: absolute;
+      content: '';
+      height: 20px;
+      width: 20px;
+      left: 4px;
+      bottom: 4px;
+      background: var(--muted);
+      border-radius: 50%;
+      transition: 0.3s;
+    }
+    input:checked + .toggle-slider { background: var(--green); }
+    input:checked + .toggle-slider:before {
+      transform: translateX(28px);
+      background: var(--black);
+    }
+    .toggle-desc { color: var(--muted); font-size: 0.75rem; }
+
+    /* SECTIONS */
+    .section-label {
+      font-size: 0.65rem;
+      letter-spacing: 0.25em;
+      color: var(--muted);
+      margin-bottom: 1rem;
+      margin-top: 2rem;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--faint);
+      border-radius: 4px;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+    }
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+    @media (max-width: 600px) { .form-row { grid-template-columns: 1fr; } }
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-label { font-size: 0.65rem; letter-spacing: 0.15em; color: var(--muted); }
+    .form-input {
+      background: var(--black);
+      border: 1px solid var(--faint);
+      border-radius: 4px;
+      color: var(--text);
+      font-family: 'DM Mono', monospace;
+      font-size: 13px;
+      padding: 10px 12px;
+      outline: none;
+      width: 100%;
+    }
+    .form-input:focus { border-color: var(--sky); }
+
+    /* BUTTONS */
+    .btn-row { display: flex; gap: 1rem; margin-top: 1.5rem; flex-wrap: wrap; }
+    .btn {
+      border: none;
+      border-radius: 4px;
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      padding: 12px 20px;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    .btn:hover { opacity: 0.85; }
+    .btn-primary { background: var(--sky); color: var(--black); }
+    .btn-danger { background: var(--red); color: var(--black); }
+    .btn-outline { background: transparent; border: 1px solid var(--faint); color: var(--text); }
+    .btn-success { background: var(--green); color: var(--black); }
+
+    /* GAMES LIST */
+    .game-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem;
+      border-bottom: 1px solid var(--faint);
+      gap: 1rem;
+    }
+    .game-item:last-child { border-bottom: none; }
+    .game-info { flex: 1; }
+    .game-title { color: var(--text); margin-bottom: 4px; }
+    .game-meta { color: var(--muted); font-size: 0.7rem; }
+    .game-badge {
+      font-size: 0.6rem;
+      letter-spacing: 0.15em;
+      padding: 3px 8px;
+      border-radius: 2px;
+    }
+    .game-badge.open { background: rgba(107,232,160,0.15); color: var(--green); border: 1px solid rgba(107,232,160,0.3); }
+    .game-badge.closed { background: rgba(107,122,153,0.15); color: var(--muted); border: 1px solid var(--faint); }
+    .game-badge.upcoming { background: rgba(107,173,232,0.15); color: var(--sky); border: 1px solid rgba(107,173,232,0.3); }
+    .game-actions { display: flex; gap: 8px; }
+    .game-btn {
+      background: transparent;
+      border: 1px solid var(--faint);
+      border-radius: 4px;
+      color: var(--muted);
+      font-family: 'DM Mono', monospace;
+      font-size: 9px;
+      letter-spacing: 1px;
+      padding: 5px 10px;
+      cursor: pointer;
+    }
+    .game-btn:hover { color: var(--text); border-color: var(--text); }
+    .game-btn.activate { color: var(--green); border-color: var(--green); }
+
+    /* TOAST */
+    #toast {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      background: var(--card);
+      border: 1px solid var(--sky);
+      border-radius: 4px;
+      color: var(--sky);
+      font-size: 11px;
+      letter-spacing: 1px;
+      padding: 12px 20px;
+      display: none;
+      z-index: 999;
+    }
+
+    /* MODAL */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(8,10,14,0.85);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+      padding: 1rem;
+    }
+    .modal-overlay.active { display: flex; }
+    .modal {
+      background: var(--card);
+      border: 1px solid var(--faint);
+      border-radius: 4px;
+      padding: 2rem;
+      width: 100%;
+      max-width: 480px;
+    }
+    .modal-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.4rem;
+      letter-spacing: 0.1em;
+      color: var(--sky);
+      margin-bottom: 1.5rem;
+    }
+
+    .divider { height: 1px; background: var(--faint); margin: 2rem 0; }
+  </style>
+</head>
+<body>
+
+<!-- LOGIN SCREEN -->
+<div id="login-screen">
+  <div class="logo">October-<span>San</span>™</div>
+  <div class="badge">ADMIN DASHBOARD</div>
+  <input type="password" id="admin-password" placeholder="Enter admin password" />
+  <button onclick="login()">ACCESS DASHBOARD</button>
+  <div id="login-error">Incorrect password. Try again.</div>
+</div>
+
+<!-- MAIN SCREEN -->
+<div id="main-screen">
+  <nav>
+    <div class="nav-logo">October-<span>San</span>™ <span style="color:var(--muted);font-size:0.7rem;font-family:'DM Mono',monospace;font-style:normal"> ADMIN</span></div>
+    <div class="nav-right">
+      <div class="nav-badge" id="nav-status">LOADING...</div>
+      <button class="logout-btn" onclick="logout()">SIGN OUT</button>
+    </div>
+  </nav>
+
+  <main>
+
+    <!-- STATUS BAR -->
+    <div class="status-bar">
+      <div class="status-left">
+        <div class="status-dot" id="status-dot"></div>
+        <div>
+          <div class="status-label" id="status-label">LOADING</div>
+          <div class="status-game" id="status-game">—</div>
+        </div>
+      </div>
+      <div class="status-right">
+        <div class="status-stat">
+          <div class="status-stat-num" id="mint-count">—</div>
+          <div class="status-stat-label">MINTED TODAY</div>
+        </div>
+        <div class="status-stat">
+          <div class="status-stat-num" id="max-mints">—</div>
+          <div class="status-stat-label">MAX MINTS</div>
+        </div>
+        <div class="status-stat">
+          <div class="status-stat-num" id="collection-num">—</div>
+          <div class="status-stat-label">COLLECTION #</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CURRENT COLLECTION TOGGLE -->
+    <div class="toggle-section">
+      <div class="toggle-row">
+        <div class="toggle-title">COLLECTION STATUS</div>
+        <label class="toggle-switch">
+          <input type="checkbox" id="collection-toggle" onchange="toggleCollection()">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+      <div class="toggle-desc" id="toggle-desc">Loading collection status...</div>
+    </div>
+
+    <!-- CURRENT GAME EDITOR -->
+    <div class="section-label">CURRENT GAME</div>
+    <div class="card">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">GAME TITLE</label>
+          <input type="text" class="form-input" id="game-title" placeholder="Dodgers vs Cardinals" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">TEAMS</label>
+          <input type="text" class="form-input" id="game-teams" placeholder="LAD vs STL" />
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">GAME DATE</label>
+          <input type="text" class="form-input" id="game-date" placeholder="September 1, 2026" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">MAX MINTS</label>
+          <input type="number" class="form-input" id="game-max-mints" placeholder="1000" />
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">OPEN TIME (LOCAL)</label>
+          <input type="datetime-local" class="form-input" id="game-open-time" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">CLOSE TIME (LOCAL)</label>
+          <input type="datetime-local" class="form-input" id="game-close-time" />
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="saveCurrentGame()">SAVE GAME</button>
+        <button class="btn btn-outline" onclick="resetMintCount()">RESET MINT COUNT</button>
+      </div>
+    </div>
+
+    <!-- SCHEDULED GAMES -->
+    <div class="section-label">SCHEDULED GAMES</div>
+    <div class="card" style="padding: 0;">
+      <div id="games-list">
+        <div style="padding: 2rem; color: var(--muted); text-align: center;">Loading games...</div>
+      </div>
+    </div>
+    <button class="btn btn-outline" onclick="openNewGameModal()" style="margin-top: 1rem;">+ ADD NEW GAME</button>
+
+    <div class="divider"></div>
+
+    <!-- STATS -->
+    <div class="section-label">ALL TIME STATS</div>
+    <div class="card">
+      <div class="form-row">
+        <div class="status-stat">
+          <div class="status-stat-num" id="total-collections">—</div>
+          <div class="status-stat-label">TOTAL COLLECTIONS</div>
+        </div>
+        <div class="status-stat">
+          <div class="status-stat-num" id="total-mints">—</div>
+          <div class="status-stat-label">TOTAL MINTS</div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- NEW GAME MODAL -->
+<div class="modal-overlay" id="new-game-modal">
+  <div class="modal">
+    <div class="modal-title">NEW GAME</div>
+    <div class="form-group" style="margin-bottom: 1rem;">
+      <label class="form-label">GAME TITLE</label>
+      <input type="text" class="form-input" id="new-game-title" placeholder="Dodgers vs Giants" />
+    </div>
+    <div class="form-group" style="margin-bottom: 1rem;">
+      <label class="form-label">TEAMS</label>
+      <input type="text" class="form-input" id="new-game-teams" placeholder="LAD vs SF" />
+    </div>
+    <div class="form-group" style="margin-bottom: 1rem;">
+      <label class="form-label">GAME DATE</label>
+      <input type="text" class="form-input" id="new-game-date" placeholder="September 5, 2026" />
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">OPEN TIME</label>
+        <input type="datetime-local" class="form-input" id="new-game-open" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">CLOSE TIME</label>
+        <input type="datetime-local" class="form-input" id="new-game-close" />
+      </div>
+    </div>
+    <div class="form-group" style="margin: 1rem 0;">
+      <label class="form-label">MAX MINTS</label>
+      <input type="number" class="form-input" id="new-game-max" placeholder="1000" value="1000" />
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="saveNewGame()">CREATE GAME</button>
+      <button class="btn btn-outline" onclick="closeModal()">CANCEL</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<script>
+  // ─── CONFIG ───────────────────────────────────────────────
+  const FIREBASE_URL = 'https://firestore.googleapis.com/v1/projects/october-san-e3a33/databases/(default)/documents';
+  const FIREBASE_API_KEY = 'AIzaSyBk5lN7XqYNzW9nCi8QNzF_placeholder'; // Will be set via env
+  const ADMIN_PASSWORD = 'octsn_admin_2026'; // Change this!
+
+  // ─── AUTH ─────────────────────────────────────────────────
+  function login() {
+    const pw = document.getElementById('admin-password').value;
+    if (pw === ADMIN_PASSWORD) {
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('main-screen').style.display = 'block';
+      loadDashboard();
+    } else {
+      document.getElementById('login-error').style.display = 'block';
+    }
+  }
+
+  document.getElementById('admin-password').addEventListener('keydown', e => {
+    if (e.key === 'Enter') login();
+  });
+
+  function logout() {
+    document.getElementById('main-screen').style.display = 'none';
+    document.getElementById('login-screen').style.display = 'flex';
+    document.getElementById('admin-password').value = '';
+  }
+
+  // ─── FIREBASE ─────────────────────────────────────────────
+  async function firebaseGet(path) {
+    const res = await fetch(`${FIREBASE_URL}/${path}?key=${FIREBASE_API_KEY}`);
+    return res.json();
+  }
+
+  async function firebasePatch(path, fields) {
+    const fieldMask = Object.keys(fields).map(f => `updateMask.fieldPaths=${f}`).join('&');
+    const res = await fetch(`${FIREBASE_URL}/${path}?key=${FIREBASE_API_KEY}&${fieldMask}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ fields })
+    });
+    return res.json();
+  }
+
+  async function firebaseSet(path, fields) {
+    const res = await fetch(`${FIREBASE_URL}/${path}?key=${FIREBASE_API_KEY}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ fields })
+    });
+    return res.json();
+  }
+
+  function parseField(field) {
+    if (!field) return null;
+    if (field.stringValue !== undefined) return field.stringValue;
+    if (field.booleanValue !== undefined) return field.booleanValue;
+    if (field.integerValue !== undefined) return parseInt(field.integerValue);
+    if (field.timestampValue !== undefined) return field.timestampValue;
+    return null;
+  }
+
+  function toStringField(val) { return { stringValue: String(val) }; }
+  function toBoolField(val) { return { booleanValue: Boolean(val) }; }
+  function toIntField(val) { return { integerValue: String(parseInt(val)) }; }
+
+  // ─── LOAD DASHBOARD ───────────────────────────────────────
+  let currentCollection = null;
+  let allGames = [];
+
+  async function loadDashboard() {
+    await loadCurrentCollection();
+    await loadAllGames();
+    await loadStats();
+    // Auto-refresh every 30 seconds
+    setInterval(loadCurrentCollection, 30000);
+  }
+
+  async function loadCurrentCollection() {
+    try {
+      const data = await firebaseGet('collections/current');
+      if (!data.fields) return;
+      const f = data.fields;
+      currentCollection = {
+        isOpen: parseField(f.isOpen),
+        gameTitle: parseField(f.gameTitle),
+        gameDate: parseField(f.gameDate),
+        teams: parseField(f.teams),
+        mintCount: parseField(f.mintCount) || 0,
+        maxMints: parseField(f.maxMints) || 1000,
+        collectionNumber: parseField(f.collectionNumber) || 1,
+        openTime: parseField(f.openTime) || '',
+        closeTime: parseField(f.closeTime) || '',
+      };
+      updateStatusBar();
+      updateForm();
+    } catch(e) {
+      console.error('Load error:', e);
+    }
+  }
+
+  function updateStatusBar() {
+    if (!currentCollection) return;
+    const isOpen = currentCollection.isOpen;
+    
+    document.getElementById('status-dot').className = `status-dot ${isOpen ? 'open' : ''}`;
+    document.getElementById('status-label').textContent = isOpen ? 'COLLECTION OPEN' : 'COLLECTION CLOSED';
+    document.getElementById('status-label').className = `status-label ${isOpen ? 'open' : 'closed'}`;
+    document.getElementById('status-game').textContent = currentCollection.gameTitle || '—';
+    document.getElementById('mint-count').textContent = currentCollection.mintCount;
+    document.getElementById('max-mints').textContent = currentCollection.maxMints;
+    document.getElementById('collection-num').textContent = `#${currentCollection.collectionNumber}`;
+    document.getElementById('nav-status').textContent = isOpen ? '● LIVE' : '○ CLOSED';
+    document.getElementById('nav-status').style.color = isOpen ? 'var(--green)' : 'var(--muted)';
+    
+    document.getElementById('collection-toggle').checked = isOpen;
+    document.getElementById('toggle-desc').textContent = isOpen 
+      ? `Collection is OPEN — fans can mint at the stadium` 
+      : `Collection is CLOSED — minting disabled`;
+  }
+
+  function updateForm() {
+    if (!currentCollection) return;
+    document.getElementById('game-title').value = currentCollection.gameTitle || '';
+    document.getElementById('game-teams').value = currentCollection.teams || '';
+    document.getElementById('game-date').value = currentCollection.gameDate || '';
+    document.getElementById('game-max-mints').value = currentCollection.maxMints || 1000;
+    if (currentCollection.openTime) {
+      document.getElementById('game-open-time').value = toLocalDateTimeInput(currentCollection.openTime);
+    }
+    if (currentCollection.closeTime) {
+      document.getElementById('game-close-time').value = toLocalDateTimeInput(currentCollection.closeTime);
+    }
+  }
+
+  function toLocalDateTimeInput(isoString) {
+    if (!isoString) return '';
+    const d = new Date(isoString);
+    const pad = n => String(n).padStart(2, '0');
+    return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  }
+
+  // ─── TOGGLE COLLECTION ────────────────────────────────────
+  async function toggleCollection() {
+    const isOpen = document.getElementById('collection-toggle').checked;
+    try {
+      await firebasePatch('collections/current', {
+        isOpen: toBoolField(isOpen)
+      });
+      currentCollection.isOpen = isOpen;
+      updateStatusBar();
+      showToast(isOpen ? '✓ COLLECTION OPENED' : '✓ COLLECTION CLOSED');
+    } catch(e) {
+      showToast('✗ ERROR — Try again');
+      document.getElementById('collection-toggle').checked = !isOpen;
+    }
+  }
+
+  // ─── SAVE CURRENT GAME ────────────────────────────────────
+  async function saveCurrentGame() {
+    const openTimeInput = document.getElementById('game-open-time').value;
+    const closeTimeInput = document.getElementById('game-close-time').value;
+    
+    const fields = {
+      gameTitle: toStringField(document.getElementById('game-title').value),
+      teams: toStringField(document.getElementById('game-teams').value),
+      gameDate: toStringField(document.getElementById('game-date').value),
+      maxMints: toIntField(document.getElementById('game-max-mints').value || 1000),
+    };
+
+    if (openTimeInput) fields.openTime = toStringField(new Date(openTimeInput).toISOString());
+    if (closeTimeInput) fields.closeTime = toStringField(new Date(closeTimeInput).toISOString());
+
+    try {
+      await firebasePatch('collections/current', fields);
+      showToast('✓ GAME SAVED');
+      await loadCurrentCollection();
+    } catch(e) {
+      showToast('✗ ERROR — Try again');
+    }
+  }
+
+  // ─── RESET MINT COUNT ─────────────────────────────────────
+  async function resetMintCount() {
+    if (!confirm('Reset mint count to 0?')) return;
+    try {
+      await firebasePatch('collections/current', { mintCount: toIntField(0) });
+      showToast('✓ MINT COUNT RESET');
+      await loadCurrentCollection();
+    } catch(e) {
+      showToast('✗ ERROR');
+    }
+  }
+
+  // ─── ALL GAMES ────────────────────────────────────────────
+  async function loadAllGames() {
+    try {
+      const res = await fetch(`${FIREBASE_URL}/games?key=${FIREBASE_API_KEY}`);
+      const data = await res.json();
+      const docs = data.documents || [];
+      allGames = docs.map(doc => {
+        const f = doc.fields || {};
+        const id = doc.name.split('/').pop();
+        return {
+          id,
+          gameTitle: parseField(f.gameTitle) || '—',
+          teams: parseField(f.teams) || '—',
+          gameDate: parseField(f.gameDate) || '—',
+          mintCount: parseField(f.mintCount) || 0,
+          maxMints: parseField(f.maxMints) || 1000,
+          openTime: parseField(f.openTime) || '',
+          closeTime: parseField(f.closeTime) || '',
+          collectionNumber: parseField(f.collectionNumber) || 0,
+        };
+      });
+      renderGamesList();
+    } catch(e) {
+      document.getElementById('games-list').innerHTML = '<div style="padding: 2rem; color: var(--muted); text-align: center;">No scheduled games yet</div>';
+    }
+  }
+
+  function getGameStatus(game) {
+    const now = new Date();
+    if (game.openTime && game.closeTime) {
+      const open = new Date(game.openTime);
+      const close = new Date(game.closeTime);
+      if (now >= open && now <= close) return 'open';
+      if (now < open) return 'upcoming';
+      return 'closed';
+    }
+    return 'upcoming';
+  }
+
+  function renderGamesList() {
+    const list = document.getElementById('games-list');
+    if (allGames.length === 0) {
+      list.innerHTML = '<div style="padding: 2rem; color: var(--muted); text-align: center;">No scheduled games yet. Add one below.</div>';
+      return;
+    }
+    list.innerHTML = allGames.map(game => {
+      const status = getGameStatus(game);
+      return `
+        <div class="game-item">
+          <div class="game-info">
+            <div class="game-title">${game.gameTitle}</div>
+            <div class="game-meta">${game.gameDate} · ${game.teams} · ${game.mintCount}/${game.maxMints} minted</div>
+            ${game.openTime ? `<div class="game-meta" style="color:var(--sky);margin-top:2px;">Opens: ${new Date(game.openTime).toLocaleString()}</div>` : ''}
+          </div>
+          <span class="game-badge ${status}">${status.toUpperCase()}</span>
+          <div class="game-actions">
+            <button class="game-btn activate" onclick="activateGame('${game.id}')">ACTIVATE</button>
+            <button class="game-btn" onclick="deleteGame('${game.id}')">DELETE</button>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  async function activateGame(gameId) {
+    const game = allGames.find(g => g.id === gameId);
+    if (!game) return;
+    if (!confirm(`Activate "${game.gameTitle}" as the current collection?`)) return;
+    try {
+      const nextNum = (currentCollection?.collectionNumber || 0) + 1;
+      await firebaseSet('collections/current', {
+        gameTitle: toStringField(game.gameTitle),
+        teams: toStringField(game.teams),
+        gameDate: toStringField(game.gameDate),
+        maxMints: toIntField(game.maxMints),
+        mintCount: toIntField(0),
+        isOpen: toBoolField(false),
+        collectionNumber: toIntField(nextNum),
+        openTime: game.openTime ? toStringField(game.openTime) : toStringField(''),
+        closeTime: game.closeTime ? toStringField(game.closeTime) : toStringField(''),
+      });
+      showToast(`✓ ${game.gameTitle} ACTIVATED`);
+      await loadCurrentCollection();
+    } catch(e) {
+      showToast('✗ ERROR');
+    }
+  }
+
+  async function deleteGame(gameId) {
+    if (!confirm('Delete this game?')) return;
+    try {
+      await fetch(`${FIREBASE_URL}/games/${gameId}?key=${FIREBASE_API_KEY}`, { method: 'DELETE' });
+      showToast('✓ GAME DELETED');
+      await loadAllGames();
+    } catch(e) {
+      showToast('✗ ERROR');
+    }
+  }
+
+  // ─── NEW GAME MODAL ───────────────────────────────────────
+  function openNewGameModal() {
+    document.getElementById('new-game-modal').classList.add('active');
+  }
+
+  function closeModal() {
+    document.getElementById('new-game-modal').classList.remove('active');
+  }
+
+  async function saveNewGame() {
+    const title = document.getElementById('new-game-title').value;
+    const teams = document.getElementById('new-game-teams').value;
+    const date = document.getElementById('new-game-date').value;
+    const openInput = document.getElementById('new-game-open').value;
+    const closeInput = document.getElementById('new-game-close').value;
+    const maxMints = document.getElementById('new-game-max').value || 1000;
+
+    if (!title || !teams || !date) {
+      alert('Please fill in title, teams and date.');
+      return;
+    }
+
+    const gameId = `game_${Date.now()}`;
+    const fields = {
+      gameTitle: toStringField(title),
+      teams: toStringField(teams),
+      gameDate: toStringField(date),
+      maxMints: toIntField(maxMints),
+      mintCount: toIntField(0),
+      createdAt: toStringField(new Date().toISOString()),
+    };
+
+    if (openInput) fields.openTime = toStringField(new Date(openInput).toISOString());
+    if (closeInput) fields.closeTime = toStringField(new Date(closeInput).toISOString());
+
+    try {
+      await firebaseSet(`games/${gameId}`, fields);
+      showToast('✓ GAME CREATED');
+      closeModal();
+      await loadAllGames();
+      // Clear form
+      ['new-game-title','new-game-teams','new-game-date','new-game-open','new-game-close'].forEach(id => {
+        document.getElementById(id).value = '';
+      });
+      document.getElementById('new-game-max').value = '1000';
+    } catch(e) {
+      showToast('✗ ERROR');
+    }
+  }
+
+  // ─── STATS ────────────────────────────────────────────────
+  async function loadStats() {
+    try {
+      const res = await fetch(`${FIREBASE_URL}/games?key=${FIREBASE_API_KEY}`);
+      const data = await res.json();
+      const docs = data.documents || [];
+      const totalMints = docs.reduce((sum, doc) => {
+        return sum + (parseInt(doc.fields?.mintCount?.integerValue || 0));
+      }, 0);
+      document.getElementById('total-collections').textContent = docs.length;
+      document.getElementById('total-mints').textContent = totalMints + (currentCollection?.mintCount || 0);
+    } catch(e) {
+      document.getElementById('total-collections').textContent = '—';
+      document.getElementById('total-mints').textContent = '—';
+    }
+  }
+
+  // ─── TOAST ────────────────────────────────────────────────
+  function showToast(msg) {
+    const toast = document.getElementById('toast');
+    toast.textContent = msg;
+    toast.style.display = 'block';
+    setTimeout(() => { toast.style.display = 'none'; }, 3000);
+  }
+</script>
+
+</body>
+</html>
