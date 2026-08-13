@@ -530,9 +530,18 @@
   };
 
   window.copyWalletAddress = function() {
-    if (window._walletAddress) {
-      navigator.clipboard.writeText(window._walletAddress).then(() => {
-        showStatus('Wallet address copied! Send POL to this address then refresh.', 'info');
+    if (connectedAccount && connectedAccount.address) {
+      navigator.clipboard.writeText(connectedAccount.address).then(() => {
+        const btn = document.getElementById('copy-btn');
+        btn.textContent = '✓ COPIED!';
+        btn.style.color = 'var(--green)';
+        btn.style.borderColor = 'var(--green)';
+        setTimeout(() => {
+          btn.textContent = '📋 Copy my wallet address';
+          btn.style.color = '';
+          btn.style.borderColor = '';
+        }, 2000);
+        showStatus('Wallet address copied! Send POL then refresh the page.', 'info');
       });
     }
   };
