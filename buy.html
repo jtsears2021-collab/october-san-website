@@ -284,7 +284,8 @@
     </div>
 
     <div id="buy-section">
-      <button id="connect-btn" class="btn btn-primary" onclick="connectWallet()">CONNECT WALLET</button>
+      <button id="connect-apple-btn" class="btn btn-primary" onclick="connectWallet('apple')">🍎 SIGN IN WITH APPLE</button>
+      <button id="connect-google-btn" class="btn btn-outline" onclick="connectWallet('google')">G  SIGN IN WITH GOOGLE</button>
       <button id="buy-btn" class="btn btn-buy" onclick="buyNFT()" style="display:none;">BUY THIS MOMENT</button>
       <button class="btn btn-outline" onclick="viewOnPolygon()">VIEW ON POLYGON ↗</button>
     </div>
@@ -414,16 +415,18 @@
   }
 
   // ─── CONNECT WALLET ───────────────────────────────────────
-  window.connectWallet = async function() {
-    const btn = document.getElementById('connect-btn');
-    btn.textContent = 'CONNECTING...';
-    btn.disabled = true;
+  window.connectWallet = async function(strategy) {
+    const appleBtn = document.getElementById('connect-apple-btn');
+    const googleBtn = document.getElementById('connect-google-btn');
+    appleBtn.disabled = true;
+    googleBtn.disabled = true;
+    appleBtn.textContent = 'CONNECTING...';
 
     try {
       const wallet = inAppWallet();
       const account = await wallet.connect({
         client,
-        strategy: 'google', // Will show auth options
+        strategy: strategy,
         chain: polygon,
       });
 
@@ -445,7 +448,8 @@
       // Check if sufficient
       const priceInPOL = parseFloat(listingData.priceInPOL);
       if (polBalance >= priceInPOL) {
-        btn.style.display = 'none';
+        document.getElementById('connect-apple-btn').style.display = 'none';
+        document.getElementById('connect-google-btn').style.display = 'none';
         document.getElementById('buy-btn').style.display = 'block';
         document.getElementById('insufficient-section').classList.remove('visible');
       } else {
@@ -462,8 +466,9 @@
     } catch(e) {
       console.error('Connect error:', e);
       showStatus('Could not connect wallet. Please try again.', 'error');
-      btn.textContent = 'CONNECT WALLET';
-      btn.disabled = false;
+      appleBtn.textContent = '🍎 SIGN IN WITH APPLE';
+      appleBtn.disabled = false;
+      googleBtn.disabled = false;
     }
   };
 
