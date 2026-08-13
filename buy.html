@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>October-San — Buy Moment</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Mono:wght@300;400&family=Bebas+Neue&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --sky: #6BADE8;
+      --black: #080A0E;
+      --card: #111620;
+      --text: #E8EDF5;
+      --muted: #6B7A99;
+      --faint: #2A3347;
+      --green: #6BE8A0;
+      --red: #E86B6B;
+    }
+    body {
+      background: var(--black);
+      color: var(--text);
+      font-family: 'DM Mono', monospace;
+      font-size: 13px;
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+    nav {
+      padding: 1.2rem 1.5rem;
+      border-bottom: 1px solid var(--faint);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .logo {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.4rem;
+      font-style: italic;
+      color: var(--text);
+      text-decoration: none;
+    }
+    .logo span { color: var(--sky); }
+    main {
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+    }
+    .nft-image-container {
+      width: 100%;
+      aspect-ratio: 3/4;
+      background: var(--card);
+      border: 1px solid var(--faint);
+      border-radius: 8px;
+      overflow: hidden;
+      margin-bottom: 1.5rem;
+      position: relative;
+    }
+    .nft-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .nft-placeholder {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--muted);
+      font-size: 2rem;
+    }
+    .token-badge {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: rgba(0,0,0,0.7);
+      color: var(--sky);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      padding: 4px 10px;
+      border-radius: 4px;
+    }
+    .price-badge {
+      position: absolute;
+      bottom: 10px;
+      right: 10px;
+      background: rgba(0,0,0,0.7);
+      color: var(--text);
+      font-size: 14px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 4px;
+    }
+    .nft-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.6rem;
+      letter-spacing: 0.05em;
+      color: var(--text);
+      margin-bottom: 0.5rem;
+    }
+    .nft-meta {
+      color: var(--muted);
+      font-size: 0.75rem;
+      letter-spacing: 0.1em;
+      margin-bottom: 1.5rem;
+    }
+    .price-card {
+      background: var(--card);
+      border: 1px solid var(--faint);
+      border-radius: 4px;
+      padding: 1.2rem;
+      margin-bottom: 1.5rem;
+    }
+    .price-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.5rem;
+    }
+    .price-row:last-child { margin-bottom: 0; }
+    .price-label { color: var(--muted); font-size: 0.7rem; letter-spacing: 0.15em; }
+    .price-value { color: var(--text); font-size: 1rem; }
+    .price-pol { color: var(--sky); font-size: 1.2rem; font-weight: 700; }
+    .divider { height: 1px; background: var(--faint); margin: 0.8rem 0; }
+    .wallet-card {
+      background: var(--card);
+      border: 1px solid var(--faint);
+      border-radius: 4px;
+      padding: 1.2rem;
+      margin-bottom: 1.5rem;
+      display: none;
+    }
+    .wallet-card.visible { display: block; }
+    .wallet-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .wallet-label { color: var(--muted); font-size: 0.7rem; letter-spacing: 0.15em; }
+    .wallet-address { color: var(--sky); font-size: 0.75rem; }
+    .wallet-balance { color: var(--green); font-size: 0.9rem; font-weight: 700; }
+    .balance-label { color: var(--muted); font-size: 0.65rem; letter-spacing: 0.1em; }
+    .btn {
+      width: 100%;
+      border: none;
+      border-radius: 4px;
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      padding: 16px;
+      cursor: pointer;
+      margin-bottom: 0.75rem;
+      transition: opacity 0.2s;
+    }
+    .btn:hover { opacity: 0.85; }
+    .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .btn-primary { background: var(--sky); color: var(--black); }
+    .btn-buy { background: var(--green); color: var(--black); }
+    .btn-outline { background: transparent; border: 1px solid var(--faint); color: var(--text); }
+    .status-msg {
+      text-align: center;
+      padding: 1rem;
+      border-radius: 4px;
+      margin-bottom: 1rem;
+      font-size: 0.8rem;
+      display: none;
+    }
+    .status-msg.error { background: rgba(232,107,107,0.1); border: 1px solid var(--red); color: var(--red); display: block; }
+    .status-msg.success { background: rgba(107,232,160,0.1); border: 1px solid var(--green); color: var(--green); display: block; }
+    .status-msg.info { background: rgba(107,173,232,0.1); border: 1px solid var(--sky); color: var(--sky); display: block; }
+    .insufficient {
+      background: rgba(232,107,107,0.1);
+      border: 1px solid var(--red);
+      border-radius: 4px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      display: none;
+    }
+    .insufficient.visible { display: block; }
+    .insufficient-title { color: var(--red); font-size: 0.75rem; letter-spacing: 0.1em; margin-bottom: 0.5rem; }
+    .insufficient-text { color: var(--muted); font-size: 0.75rem; margin-bottom: 1rem; }
+    .add-pol-options { display: flex; flex-direction: column; gap: 0.5rem; }
+    .add-pol-btn {
+      background: transparent;
+      border: 1px solid var(--faint);
+      border-radius: 4px;
+      color: var(--text);
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 1px;
+      padding: 10px;
+      cursor: pointer;
+      text-align: left;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .add-pol-btn:hover { border-color: var(--sky); color: var(--sky); }
+    .loading { text-align: center; padding: 3rem; color: var(--muted); }
+    .success-screen { display: none; text-align: center; padding: 2rem 0; }
+    .success-screen.visible { display: block; }
+    .success-icon { font-size: 3rem; margin-bottom: 1rem; }
+    .success-title { font-family: 'Bebas Neue', sans-serif; font-size: 2rem; letter-spacing: 0.05em; color: var(--green); margin-bottom: 0.5rem; }
+    .success-text { color: var(--muted); margin-bottom: 1.5rem; }
+    .tx-link { color: var(--sky); font-size: 0.7rem; letter-spacing: 0.1em; text-decoration: none; }
+    .tx-link:hover { text-decoration: underline; }
+    footer {
+      text-align: center;
+      padding: 2rem;
+      color: var(--muted);
+      font-size: 0.65rem;
+      letter-spacing: 0.1em;
+      border-top: 1px solid var(--faint);
+      margin-top: 3rem;
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="logo">October-<span>San</span>™</a>
+</nav>
+
+<main>
+  <div id="loading" class="loading">Loading moment...</div>
+  
+  <div id="nft-content" style="display:none;">
+    <div class="nft-image-container">
+      <img id="nft-image" class="nft-image" style="display:none;" />
+      <div id="nft-placeholder" class="nft-placeholder">◆</div>
+      <div class="token-badge" id="token-badge">#—</div>
+      <div class="price-badge" id="price-badge">—</div>
+    </div>
+
+    <div class="nft-title" id="nft-title">October-San Moment</div>
+    <div class="nft-meta" id="nft-meta">OCTOBER-SAN · POLYGON</div>
+
+    <div class="price-card">
+      <div class="price-row">
+        <span class="price-label">PRICE</span>
+        <span class="price-pol" id="price-pol">— POL</span>
+      </div>
+      <div class="divider"></div>
+      <div class="price-row">
+        <span class="price-label">APPROX. USD</span>
+        <span class="price-value" id="price-usd">—</span>
+      </div>
+      <div class="price-row">
+        <span class="price-label">SELLER</span>
+        <span class="price-value" id="seller-addr">—</span>
+      </div>
+    </div>
+
+    <div id="status-msg" class="status-msg"></div>
+
+    <div id="wallet-card" class="wallet-card">
+      <div class="wallet-row" style="margin-bottom: 0.75rem;">
+        <span class="wallet-label">YOUR WALLET</span>
+        <span class="wallet-address" id="wallet-address">—</span>
+      </div>
+      <div class="wallet-row">
+        <span class="balance-label">POL BALANCE</span>
+        <span class="wallet-balance" id="wallet-balance">— POL</span>
+      </div>
+    </div>
+
+    <div id="insufficient-section" class="insufficient">
+      <div class="insufficient-title">INSUFFICIENT POL BALANCE</div>
+      <div class="insufficient-text" id="insufficient-text">You need more POL to buy this moment.</div>
+      <div class="add-pol-options">
+        <button class="add-pol-btn" onclick="openMetaMask()">
+          🦊 Open MetaMask to send POL
+        </button>
+        <button class="add-pol-btn" onclick="copyWalletAddress()">
+          📋 Copy wallet address
+        </button>
+        <button class="add-pol-btn" onclick="openMoonPay()">
+          💳 Buy POL with card (MoonPay)
+        </button>
+      </div>
+    </div>
+
+    <div id="buy-section">
+      <button id="connect-btn" class="btn btn-primary" onclick="connectWallet()">CONNECT WALLET</button>
+      <button id="buy-btn" class="btn btn-buy" onclick="buyNFT()" style="display:none;">BUY THIS MOMENT</button>
+      <button class="btn btn-outline" onclick="viewOnPolygon()">VIEW ON POLYGON ↗</button>
+    </div>
+
+    <div id="success-screen" class="success-screen">
+      <div class="success-icon">🎉</div>
+      <div class="success-title">MOMENT YOURS!</div>
+      <div class="success-text">This October-San Moment is now in your wallet.<br>Open the app to see it in your collection.</div>
+      <a id="tx-link" class="tx-link" href="#" target="_blank">VIEW TRANSACTION ON POLYGON ↗</a>
+    </div>
+  </div>
+
+  <div id="not-found" style="display:none; text-align:center; padding: 3rem; color: var(--muted);">
+    Moment not found or no longer listed.
+  </div>
+</main>
+
+<footer>
+  © 2026 OCTOBER-SAN LLC · ALL RIGHTS RESERVED · POLYGON BLOCKCHAIN
+</footer>
+
+<script type="module">
+  import { createThirdwebClient, getContract, prepareContractCall, sendTransaction, readContract } from 'https://esm.sh/thirdweb@5.120.1';
+  import { polygon } from 'https://esm.sh/thirdweb@5.120.1/chains';
+  import { inAppWallet, createWallet } from 'https://esm.sh/thirdweb@5.120.1/wallets';
+  import { ethers } from 'https://esm.sh/ethers@5.7.2';
+
+  const CLIENT_ID = 'fb1460b2756706cc08a4f650e68fd526';
+  const CONTRACT_ADDRESS = '0x397160Ad067BaaBa7f35Dd0b7A5C25F836b2539F';
+  const MARKETPLACE_ADDRESS = '0xef77CDF9Dc521563270B6aBba379dbc3d389C08c';
+
+  const client = createThirdwebClient({ clientId: CLIENT_ID });
+
+  let tokenId = null;
+  let listingId = null;
+  let listingData = null;
+  let connectedAccount = null;
+  let connectedWallet = null;
+
+  // ─── GET TOKEN ID FROM URL ─────────────────────────────────
+  function getTokenIdFromUrl() {
+    const path = window.location.pathname;
+    const parts = path.split('/');
+    return parts[parts.length - 1] || parts[parts.length - 2];
+  }
+
+  // ─── LOAD NFT AND LISTING ──────────────────────────────────
+  async function loadNFT() {
+    tokenId = getTokenIdFromUrl();
+    
+    if (!tokenId || tokenId === 'buy') {
+      showNotFound();
+      return;
+    }
+
+    try {
+      // Get NFT metadata
+      const nftRes = await fetch(
+        `https://137.insight.thirdweb.com/v1/nfts/${CONTRACT_ADDRESS}/${tokenId}`,
+        { headers: { 'x-client-id': CLIENT_ID } }
+      );
+      const nftData = await nftRes.json();
+      const nft = nftData.data?.[0];
+
+      // Get marketplace listing
+      const provider = new ethers.providers.JsonRpcProvider(
+        `https://137.rpc.thirdweb.com/${CLIENT_ID}`
+      );
+      const marketAbi = [
+        'function getAllListings(uint256 _startId, uint256 _endId) external view returns (tuple(uint256 listingId, uint256 tokenId, uint256 quantity, uint256 pricePerToken, uint128 startTimestamp, uint128 endTimestamp, address listingCreator, address assetContract, address currency, uint8 tokenType, uint8 status, bool reserved)[] listings)',
+        'function totalListings() external view returns (uint256)',
+      ];
+      const marketplace = new ethers.Contract(MARKETPLACE_ADDRESS, marketAbi, provider);
+      const total = await marketplace.totalListings();
+      
+      if (total.eq(0)) { showNotFound(); return; }
+      
+      const listings = await marketplace.getAllListings(0, total.sub(1));
+      const listing = listings.find(l => 
+        l.status === 1 && 
+        l.tokenId.toString() === tokenId.toString() &&
+        l.assetContract.toLowerCase() === CONTRACT_ADDRESS.toLowerCase()
+      );
+
+      if (!listing) { showNotFound(); return; }
+
+      listingId = listing.listingId.toString();
+      const priceInPOL = ethers.utils.formatEther(listing.pricePerToken);
+      const priceInUSD = (parseFloat(priceInPOL) * 0.07).toFixed(2);
+
+      listingData = {
+        listingId,
+        tokenId: tokenId.toString(),
+        priceInPOL,
+        priceInUSD,
+        seller: listing.listingCreator,
+        priceWei: listing.pricePerToken.toString(),
+      };
+
+      // Update UI
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('nft-content').style.display = 'block';
+      document.getElementById('token-badge').textContent = `#${tokenId}`;
+      document.getElementById('price-badge').textContent = `${parseFloat(priceInPOL).toFixed(2)} POL`;
+      document.getElementById('nft-title').textContent = nft?.name || `October-San Moment #${tokenId}`;
+      document.getElementById('nft-meta').textContent = `TOKEN #${tokenId} · OCTOBER-SAN · POLYGON`;
+      document.getElementById('price-pol').textContent = `${parseFloat(priceInPOL).toFixed(4)} POL`;
+      document.getElementById('price-usd').textContent = `~$${priceInUSD} USD`;
+      document.getElementById('seller-addr').textContent = `${listing.listingCreator.substring(0,6)}...${listing.listingCreator.slice(-4)}`;
+
+      if (nft?.image_url) {
+        const imageUrl = nft.image_url.startsWith('ipfs://')
+          ? `https://${CLIENT_ID}.ipfscdn.io/ipfs/${nft.image_url.slice(7)}`
+          : nft.image_url;
+        const img = document.getElementById('nft-image');
+        img.src = imageUrl;
+        img.style.display = 'block';
+        document.getElementById('nft-placeholder').style.display = 'none';
+      }
+
+      document.title = `Buy ${nft?.name || 'Moment #' + tokenId} — October-San`;
+
+    } catch(e) {
+      console.error('Load error:', e);
+      showNotFound();
+    }
+  }
+
+  // ─── CONNECT WALLET ───────────────────────────────────────
+  window.connectWallet = async function() {
+    const btn = document.getElementById('connect-btn');
+    btn.textContent = 'CONNECTING...';
+    btn.disabled = true;
+
+    try {
+      const wallet = inAppWallet();
+      const account = await wallet.connect({
+        client,
+        strategy: 'google', // Will show auth options
+        chain: polygon,
+      });
+
+      connectedAccount = account;
+      connectedWallet = wallet;
+
+      document.getElementById('wallet-address').textContent = 
+        `${account.address.substring(0,6)}...${account.address.slice(-4)}`;
+      document.getElementById('wallet-card').classList.add('visible');
+
+      // Get POL balance
+      const provider = new ethers.providers.JsonRpcProvider(
+        `https://137.rpc.thirdweb.com/${CLIENT_ID}`
+      );
+      const balance = await provider.getBalance(account.address);
+      const polBalance = parseFloat(ethers.utils.formatEther(balance));
+      document.getElementById('wallet-balance').textContent = `${polBalance.toFixed(4)} POL`;
+
+      // Check if sufficient
+      const priceInPOL = parseFloat(listingData.priceInPOL);
+      if (polBalance >= priceInPOL) {
+        btn.style.display = 'none';
+        document.getElementById('buy-btn').style.display = 'block';
+        document.getElementById('insufficient-section').classList.remove('visible');
+      } else {
+        const needed = (priceInPOL - polBalance).toFixed(4);
+        document.getElementById('insufficient-text').textContent = 
+          `You need ${needed} more POL to buy this moment. Current balance: ${polBalance.toFixed(4)} POL`;
+        document.getElementById('insufficient-section').classList.add('visible');
+        btn.style.display = 'none';
+      }
+
+      // Store wallet address for add POL functions
+      window._walletAddress = account.address;
+
+    } catch(e) {
+      console.error('Connect error:', e);
+      showStatus('Could not connect wallet. Please try again.', 'error');
+      btn.textContent = 'CONNECT WALLET';
+      btn.disabled = false;
+    }
+  };
+
+  // ─── BUY NFT ──────────────────────────────────────────────
+  window.buyNFT = async function() {
+    const btn = document.getElementById('buy-btn');
+    btn.textContent = 'PURCHASING...';
+    btn.disabled = true;
+
+    try {
+      showStatus('Preparing transaction...', 'info');
+
+      const marketContract = getContract({
+        client,
+        chain: polygon,
+        address: MARKETPLACE_ADDRESS,
+      });
+
+      const tx = prepareContractCall({
+        contract: marketContract,
+        method: 'function buyFromListing(uint256 listingId, address buyFor, uint256 quantity, address currency, uint256 expectedTotalPrice)',
+        params: [
+          BigInt(listingData.listingId),
+          connectedAccount.address,
+          BigInt(1),
+          '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',
+          BigInt(listingData.priceWei),
+        ],
+        value: BigInt(listingData.priceWei),
+      });
+
+      showStatus('Confirm in your wallet...', 'info');
+
+      const result = await sendTransaction({
+        transaction: tx,
+        account: connectedAccount,
+      });
+
+      // Success!
+      document.getElementById('nft-content').style.display = 'none';
+      document.getElementById('success-screen').classList.add('visible');
+      document.getElementById('tx-link').href = 
+        `https://polygonscan.com/tx/${result.transactionHash}`;
+
+    } catch(e) {
+      console.error('Buy error:', e);
+      showStatus('Transaction failed. Please try again.', 'error');
+      btn.textContent = 'BUY THIS MOMENT';
+      btn.disabled = false;
+    }
+  };
+
+  // ─── ADD POL OPTIONS ──────────────────────────────────────
+  window.openMetaMask = function() {
+    window.location.href = 'metamask://';
+    setTimeout(() => {
+      window.open('https://metamask.io/download/', '_blank');
+    }, 1000);
+  };
+
+  window.copyWalletAddress = function() {
+    if (window._walletAddress) {
+      navigator.clipboard.writeText(window._walletAddress).then(() => {
+        showStatus('Wallet address copied! Send POL to this address then refresh.', 'info');
+      });
+    }
+  };
+
+  window.openMoonPay = function() {
+    const addr = window._walletAddress || '';
+    window.open(`https://buy.moonpay.com/?currencyCode=matic_polygon&walletAddress=${addr}`, '_blank');
+  };
+
+  window.viewOnPolygon = function() {
+    window.open(`https://polygonscan.com/token/${CONTRACT_ADDRESS}?a=${tokenId}`, '_blank');
+  };
+
+  // ─── HELPERS ──────────────────────────────────────────────
+  function showNotFound() {
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('not-found').style.display = 'block';
+  }
+
+  function showStatus(msg, type) {
+    const el = document.getElementById('status-msg');
+    el.textContent = msg;
+    el.className = `status-msg ${type}`;
+  }
+
+  // ─── INIT ─────────────────────────────────────────────────
+  loadNFT();
+</script>
+
+</body>
+</html>
