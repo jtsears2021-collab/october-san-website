@@ -512,7 +512,7 @@
 
       // Success!
       const txHash = result.transactionHash || result.hash || '';
-      document.getElementById('buy-btn').style.display = 'none';
+      document.getElementById('nft-content').style.display = 'none';
       document.getElementById('success-screen').classList.add('visible');
       document.getElementById('tx-link').href = `https://polygonscan.com/tx/${txHash}`;
       document.getElementById('tx-link').style.display = txHash ? 'block' : 'none';
