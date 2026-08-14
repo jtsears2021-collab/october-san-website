@@ -468,11 +468,11 @@
       console.error('Connect error:', e);
       setTimeout(() => {
         if (!connectedAccount) {
-          showStatus('Could not connect wallet. Please try again.', 'error');
+          showStatus('Tap to connect again if needed.', 'info');
           if (appleBtn) { appleBtn.textContent = '🍎 SIGN IN WITH APPLE'; appleBtn.disabled = false; }
           if (googleBtn) { googleBtn.disabled = false; }
         }
-      }, 1000);
+      }, 1500);
     }
   };
 
