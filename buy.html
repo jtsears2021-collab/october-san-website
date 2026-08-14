@@ -466,6 +466,8 @@
 
     } catch(e) {
       console.error('Connect error:', e);
+      // Only show error if wallet didn't connect
+      if (!connectedAccount) {
       showStatus('Could not connect wallet. Please try again.', 'error');
       appleBtn.textContent = '🍎 SIGN IN WITH APPLE';
       appleBtn.disabled = false;
