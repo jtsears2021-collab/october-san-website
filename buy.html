@@ -457,7 +457,8 @@
         document.getElementById('insufficient-text').textContent = 
           `You need ${needed} more POL to buy this moment. Current balance: ${polBalance.toFixed(4)} POL`;
         document.getElementById('insufficient-section').classList.add('visible');
-        btn.style.display = 'none';
+        if (appleBtn) appleBtn.style.display = 'none';
+        if (googleBtn) googleBtn.style.display = 'none';
       }
 
       // Store wallet address for add POL functions
@@ -465,7 +466,11 @@
 
     } catch(e) {
       console.error('Connect error:', e);
-      // Silent catch - wallet connects successfully despite the error
+      if (!connectedAccount) {
+        showStatus('Could not connect wallet. Please try again.', 'error');
+        if (appleBtn) { appleBtn.textContent = '🍎 SIGN IN WITH APPLE'; appleBtn.disabled = false; }
+        if (googleBtn) { googleBtn.disabled = false; }
+      }
     }
   };
 
