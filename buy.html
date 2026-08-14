@@ -466,11 +466,13 @@
 
     } catch(e) {
       console.error('Connect error:', e);
-      if (!connectedAccount) {
-        showStatus('Could not connect wallet. Please try again.', 'error');
-        if (appleBtn) { appleBtn.textContent = '🍎 SIGN IN WITH APPLE'; appleBtn.disabled = false; }
-        if (googleBtn) { googleBtn.disabled = false; }
-      }
+      setTimeout(() => {
+        if (!connectedAccount) {
+          showStatus('Could not connect wallet. Please try again.', 'error');
+          if (appleBtn) { appleBtn.textContent = '🍎 SIGN IN WITH APPLE'; appleBtn.disabled = false; }
+          if (googleBtn) { googleBtn.disabled = false; }
+        }
+      }, 1000);
     }
   };
 
