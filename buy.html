@@ -290,12 +290,13 @@
       <button class="btn btn-outline" onclick="viewOnPolygon()">VIEW ON POLYGON ↗</button>
     </div>
 
-    <div id="success-screen" class="success-screen">
-      <div class="success-icon">🎉</div>
-      <div class="success-title">MOMENT YOURS!</div>
-      <div class="success-text">This October-San Moment is now in your wallet.<br>Open the app to see it in your collection.</div>
-      <a id="tx-link" class="tx-link" href="#" target="_blank">VIEW TRANSACTION ON POLYGON ↗</a>
-    </div>
+  </div><!-- end nft-content -->
+
+  <div id="success-screen" class="success-screen">
+    <div class="success-icon">🎉</div>
+    <div class="success-title">MOMENT YOURS!</div>
+    <div class="success-text">This October-San Moment is now in your wallet.<br>Open the app to see it in your collection.</div>
+    <a id="tx-link" class="tx-link" href="#" target="_blank">VIEW TRANSACTION ON POLYGON ↗</a>
   </div>
 
   <div id="not-found" style="display:none; text-align:center; padding: 3rem; color: var(--muted);">
@@ -510,10 +511,11 @@
       console.log('Buy result:', JSON.stringify(result));
 
       // Success!
-      document.getElementById('nft-content').style.display = 'none';
+      const txHash = result.transactionHash || result.hash || '';
+      document.getElementById('buy-btn').style.display = 'none';
       document.getElementById('success-screen').classList.add('visible');
-      document.getElementById('tx-link').href = 
-        `https://polygonscan.com/tx/${result.transactionHash}`;
+      document.getElementById('tx-link').href = `https://polygonscan.com/tx/${txHash}`;
+      document.getElementById('tx-link').style.display = txHash ? 'block' : 'none';
 
     } catch(e) {
       console.error('Buy error:', e);
