@@ -419,9 +419,8 @@
   window.connectWallet = async function(strategy) {
     const appleBtn = document.getElementById('connect-apple-btn');
     const googleBtn = document.getElementById('connect-google-btn');
-    appleBtn.disabled = true;
-    googleBtn.disabled = true;
-    appleBtn.textContent = 'CONNECTING...';
+    if (appleBtn) { appleBtn.disabled = true; appleBtn.textContent = 'CONNECTING...'; }
+    if (googleBtn) { googleBtn.disabled = true; }
 
     try {
       const wallet = inAppWallet();
@@ -466,12 +465,10 @@
 
     } catch(e) {
       console.error('Connect error:', e);
-      // Only show error if wallet didn't connect
       if (!connectedAccount) {
         showStatus('Could not connect wallet. Please try again.', 'error');
-        appleBtn.textContent = '🍎 SIGN IN WITH APPLE';
-        appleBtn.disabled = false;
-        googleBtn.disabled = false;
+        if (appleBtn) { appleBtn.textContent = '🍎 SIGN IN WITH APPLE'; appleBtn.disabled = false; }
+        if (googleBtn) { googleBtn.disabled = false; }
       }
     }
   };
