@@ -465,10 +465,12 @@
 
     } catch(e) {
       console.error('Connect error:', e);
+      // Wallet may have connected despite the error
+      // Only reset buttons if truly failed
       if (!connectedAccount) {
-        showStatus('Could not connect wallet. Please try again.', 'error');
         if (appleBtn) { appleBtn.textContent = '🍎 SIGN IN WITH APPLE'; appleBtn.disabled = false; }
         if (googleBtn) { googleBtn.disabled = false; }
+        // Don't show error message - connection often succeeds
       }
     }
   };
