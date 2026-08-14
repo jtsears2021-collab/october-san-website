@@ -463,7 +463,8 @@
 
       // Store wallet address for add POL functions
       window._walletAddress = account.address;
-
+      document.getElementById('status-msg').style.display = 'none';
+      
     } catch(e) {
       console.error('Connect error:', e);
       setTimeout(() => {
@@ -519,6 +520,10 @@
       document.getElementById('success-screen').classList.add('visible');
       document.getElementById('tx-link').href = `https://polygonscan.com/tx/${txHash}`;
       document.getElementById('tx-link').style.display = txHash ? 'block' : 'none';
+      // Redirect back to app after 4 seconds
+      setTimeout(() => {
+        window.location.href = 'october-san://';
+      }, 4000);
 
     } catch(e) {
       console.error('Buy error:', e);
