@@ -464,14 +464,15 @@
       // Store wallet address for add POL functions
       window._walletAddress = account.address;
 
-    } catch(e) {
+    }} catch(e) {
       console.error('Connect error:', e);
       // Only show error if wallet didn't connect
       if (!connectedAccount) {
-      showStatus('Could not connect wallet. Please try again.', 'error');
-      appleBtn.textContent = '🍎 SIGN IN WITH APPLE';
-      appleBtn.disabled = false;
-      googleBtn.disabled = false;
+        showStatus('Could not connect wallet. Please try again.', 'error');
+        appleBtn.textContent = '🍎 SIGN IN WITH APPLE';
+        appleBtn.disabled = false;
+        googleBtn.disabled = false;
+      }
     }
   };
 
