@@ -284,7 +284,29 @@
     </div>
 
     <div id="buy-section">
-      <button id="connect-apple-btn" class="btn btn-primary" onclick="connectWallet('apple')">🍎 SIGN IN WITH APPLE</button>
+      <button id="connect-apple-btn" onclick="connectWallet('apple')" style="
+  background: #000;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  width: 100%;
+  height: 44px;
+  font-family: -apple-system, SF Pro Display, sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 0.75rem;
+">
+  <svg width="18" height="22" viewBox="0 0 18 22" fill="white" xmlns="http://www.w3.org/2000/svg">
+    <path d="M14.8 11.3c0-2.9 2.4-4.3 2.5-4.4-1.4-2-3.5-2.3-4.2-2.3-1.8-.2-3.5 1-4.4 1-.9 0-2.3-1-3.8-1-1.9 0-3.7 1.1-4.7 2.9-2 3.5-.5 8.6 1.4 11.5 1 1.4 2.1 2.9 3.6 2.8 1.4-.1 2-.9 3.7-.9 1.7 0 2.2.9 3.7.9 1.5 0 2.5-1.4 3.5-2.8.7-1 1.3-2.1 1.6-3.2-3.5-1.4-3.4-5.5-.9-5.5zM12.4 3.2c.8-1 1.3-2.3 1.2-3.7-1.2.1-2.6.8-3.4 1.8-.8.9-1.4 2.2-1.2 3.5 1.3.1 2.6-.6 3.4-1.6z"/>
+  </svg>
+  Sign in with Apple
+</button>
       <button id="connect-google-btn" class="btn btn-outline" onclick="connectWallet('google')">G  SIGN IN WITH GOOGLE</button>
       <button id="buy-btn" class="btn btn-buy" onclick="buyNFT()" style="display:none;">BUY THIS MOMENT</button>
       <button class="btn btn-outline" onclick="viewOnPolygon()">VIEW ON POLYGON ↗</button>
