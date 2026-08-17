@@ -640,6 +640,159 @@
 
     // Load NFTs on page load
     loadNFTs();
-  </script>
+  <script type="module">
+  const CLIENT_ID = 'fb1460b2756706cc08a4f650e68fd526';
+  const CONTRACT_ADDRESS = '0x397160Ad067BaaBa7f35Dd0b7A5C25F836b2539F';
+  const MARKETPLACE_ADDRESS = '0xef77CDF9Dc521563270B6aBba379dbc3d389C08c';
+
+  // ─── LOAD TODAY'S COLLECTION ──────────────────────────────
+  async function loadCollection() {
+    try {
+      const res = await fetch(
+        `https://137.insight.thirdweb.com/v1/nfts/${CONTRACT_ADDRESS}?limit=50`,
+        { headers: { 'x-client-id': CLIENT_ID } }
+      );
+      const data = await res.json();
+      const nfts = (data.data || []).slice(-8).reverse();
+
+      if (nfts.length === 0) {
+        document.getElementById('nft-grid').innerHTML = 
+          '<div style="color:#6B7A99;text-align:center;padding:2rem;">No moments minted yet. Be first at the stadium!</div>';
+        return;
+      }
+
+      document.getElementById('collection-label').textContent = `${nfts.length} MOMENTS MINTED`;
+      
+      document.getElementById('nft-grid').innerHTML = `
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:1rem;">
+          ${nfts.map(nft => {
+            const imageUrl = nft.image_url 
+              ? nft.image_url.startsWith('ipfs://')
+                ? `https://${CLIENT_ID}.ipfscdn.io/ipfs/${nft.image_url.slice(7)}`
+                : nft.image_url
+              : null;
+            return `
+              <a href="/buy/${nft.token_id}" style="text-decoration:none;">
+                <div style="background:#111620;border:1px solid #2A3347;border-radius:8px;overflow:hidden;position:relative;">
+                  ${imageUrl 
+                    ? `<img src="${imageUrl}" style="width:100%;aspect-ratio:3/4;object-fit:cover;" />`
+                    : `<div style="width:100%;aspect-ratio:3/4;background:#0D1117;display:flex;align-items:center;justify-content:center;color:#6B7A99;">◆</div>`
+                  }
+                  <div style="position:absolute;top:8px;left:8px;background:rgba(0,0,0,0.7);color:#6BADE8;font-size:10px;font-weight:700;padding:3px 8px;border-radius:4px;font-family:'DM Mono',monospace;">
+                    #${nft.token_id}
+                  </div>
+                  <div style="padding:8px;">
+                    <div style="color:#E8EDF5;font-size:11px;font-family:'DM Mono',monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                      ${nft.name || `Moment #${nft.token_id}`}
+                    </div>
+                  </div>
+                </div>
+              </a>
+            `;
+          }).join('')}
+        </div>
+      `;
+    } catch(e) {
+      console.error('Collection load error:', e);
+      document.getElementById('nft-grid').innerHTML = 
+        '<div style="color:#6B7A99;text-align:center;padding:2rem;">Collection loading...</div>';
+    }
+  }
+
+  // ─── LOAD MARKETPLACE ─────────────────────────────────────
+  async function loadMarketplace() {
+    try {
+      const { ethers } = await import('https://esm.sh/ethers@5.7.2');
+      const provider = new ethers.providers.JsonRpcProvider(
+        `https://137.rpc.thirdweb.com/${CLIENT_ID}`
+      );
+      
+      const marketAbi = [
+        'function getAllListings(uint256 _startId, uint256 _endId) external view returns (tuple(uint256 listingId, uint256 tokenId, uint256 quantity, uint256 pricePerToken, uint128 startTimestamp, uint128 endTimestamp, address listingCreator, address assetContract, address currency, uint8 tokenType, uint8 status, bool reserved)[] listings)',
+        'function totalListings() external view returns (uint256)',
+      ];
+      
+      const marketplace = new ethers.Contract(MARKETPLACE_ADDRESS, marketAbi, provider);
+      const total = await marketplace.totalListings();
+      
+      if (total.eq(0)) {
+        document.getElementById('marketplace-listings').innerHTML = 
+          '<div style="color:#6B7A99;text-align:center;padding:2rem;">No listings yet. Mint and list your moment!</div>';
+        return;
+      }
+      
+      const listings = await marketplace.getAllListings(0, total.sub(1));
+      const active = listings.filter(l => 
+        l.status === 1 && 
+        l.assetContract.toLowerCase() === CONTRACT_ADDRESS.toLowerCase()
+      ).slice(0, 6);
+
+      if (active.length === 0) {
+        document.getElementById('marketplace-listings').innerHTML = 
+          '<div style="color:#6B7A99;text-align:center;padding:2rem;">No active listings right now.</div>';
+        return;
+      }
+
+      const formatted = await Promise.all(active.map(async (l) => {
+        const tokenId = l.tokenId.toString();
+        const priceInPOL = ethers.utils.formatEther(l.pricePerToken);
+        const priceInUSD = (parseFloat(priceInPOL) * 0.07).toFixed(2);
+        try {
+          const nftRes = await fetch(
+            `https://137.insight.thirdweb.com/v1/nfts/${CONTRACT_ADDRESS}/${tokenId}`,
+            { headers: { 'x-client-id': CLIENT_ID } }
+          );
+          const nftData = await nftRes.json();
+          const nft = nftData.data?.[0];
+          const imageUrl = nft?.image_url
+            ? nft.image_url.startsWith('ipfs://')
+              ? `https://${CLIENT_ID}.ipfscdn.io/ipfs/${nft.image_url.slice(7)}`
+              : nft.image_url
+            : null;
+          return { tokenId, priceInPOL, priceInUSD, imageUrl, name: nft?.name };
+        } catch(e) {
+          return { tokenId, priceInPOL, priceInUSD, imageUrl: null, name: `Moment #${tokenId}` };
+        }
+      }));
+
+      document.getElementById('marketplace-listings').innerHTML = `
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:1rem;">
+          ${formatted.map(item => `
+            <a href="/buy/${item.tokenId}" style="text-decoration:none;">
+              <div style="background:#111620;border:1px solid #2A3347;border-radius:8px;overflow:hidden;position:relative;">
+                ${item.imageUrl
+                  ? `<img src="${item.imageUrl}" style="width:100%;aspect-ratio:3/4;object-fit:cover;" />`
+                  : `<div style="width:100%;aspect-ratio:3/4;background:#0D1117;display:flex;align-items:center;justify-content:center;color:#6B7A99;">◆</div>`
+                }
+                <div style="position:absolute;top:8px;left:8px;background:rgba(0,0,0,0.7);color:#6BADE8;font-size:10px;font-weight:700;padding:3px 8px;border-radius:4px;font-family:'DM Mono',monospace;">
+                  #${item.tokenId}
+                </div>
+                <div style="position:absolute;bottom:8px;right:8px;background:rgba(0,0,0,0.7);color:#E8EDF5;font-size:11px;font-weight:700;padding:3px 8px;border-radius:4px;font-family:'DM Mono',monospace;">
+                  $${item.priceInUSD}
+                </div>
+                <div style="padding:8px;">
+                  <div style="color:#E8EDF5;font-size:11px;font-family:'DM Mono',monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                    ${item.name || `Moment #${item.tokenId}`}
+                  </div>
+                  <div style="color:#6BADE8;font-size:10px;font-family:'DM Mono',monospace;margin-top:2px;">
+                    ${parseFloat(item.priceInPOL).toFixed(2)} POL
+                  </div>
+                </div>
+              </div>
+            </a>
+          `).join('')}
+        </div>
+      `;
+    } catch(e) {
+      console.error('Marketplace load error:', e);
+      document.getElementById('marketplace-listings').innerHTML = 
+        '<div style="color:#6B7A99;text-align:center;padding:2rem;">Marketplace loading...</div>';
+    }
+  }
+
+  // ─── INIT ─────────────────────────────────────────────────
+  loadCollection();
+  loadMarketplace();
+</script>
 </body>
 </html>
