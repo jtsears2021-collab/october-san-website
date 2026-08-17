@@ -734,7 +734,7 @@
       const active = listings.filter(l => 
         l.status === 1 && 
         l.assetContract.toLowerCase() === CONTRACT_ADDRESS.toLowerCase()
-      ).slice(0, 6);
+      ).slice(0, 10);
 
       if (active.length === 0) {
         document.getElementById('marketplace-listings').innerHTML = 
