@@ -699,12 +699,19 @@
   }
 
   // ─── LOAD MARKETPLACE ─────────────────────────────────────
-  async function loadMarketplace() {
+ async function loadMarketplace() {
     try {
-      const { ethers } = await import('https://esm.sh/ethers@5.7.2');
-      const provider = new ethers.providers.JsonRpcProvider(
-        `https://137.rpc.thirdweb.com/${CLIENT_ID}`
-      );
+      // Load ethers via CDN script tag approach
+      if (!window.ethers) {
+        await new Promise((resolve, reject) => {
+          const script = document.createElement('script');
+          script.src = 'https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js';
+          script.onload = resolve;
+          script.onerror = reject;
+          document.head.appendChild(script);
+        });
+      }
+      const ethers = window.ethers;
       
       const marketAbi = [
         'function getAllListings(uint256 _startId, uint256 _endId) external view returns (tuple(uint256 listingId, uint256 tokenId, uint256 quantity, uint256 pricePerToken, uint128 startTimestamp, uint128 endTimestamp, address listingCreator, address assetContract, address currency, uint8 tokenType, uint8 status, bool reserved)[] listings)',
