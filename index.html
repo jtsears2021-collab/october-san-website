@@ -713,7 +713,9 @@
         });
       }
       const ethers = window.ethers;
-      
+      const provider = new ethers.providers.JsonRpcProvider(
+        `https://137.rpc.thirdweb.com/${CLIENT_ID}`
+      );
       const marketAbi = [
         'function getAllListings(uint256 _startId, uint256 _endId) external view returns (tuple(uint256 listingId, uint256 tokenId, uint256 quantity, uint256 pricePerToken, uint128 startTimestamp, uint128 endTimestamp, address listingCreator, address assetContract, address currency, uint8 tokenType, uint8 status, bool reserved)[] listings)',
         'function totalListings() external view returns (uint256)',
