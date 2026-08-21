@@ -271,17 +271,19 @@
       <div class="insufficient-title">INSUFFICIENT POL BALANCE</div>
       <div class="insufficient-text" id="insufficient-text">You need more POL to buy this moment.</div>
       <div class="add-pol-options">
+        <button class="add-pol-btn" onclick="copyWalletAddress()" id="copy-btn">
+          📋 Copy my wallet address
+        </button>
+        <div id="copy-confirm" style="color: var(--green); font-size: 0.65rem; letter-spacing: 0.15em; text-align: center; padding: 0.25rem 0; display: none;">✓ WALLET ADDRESS COPIED</div>
+        <div style="color: var(--muted); font-size: 0.65rem; letter-spacing: 0.15em; text-align: center; padding: 0.5rem 0;">THEN</div>
         <button class="add-pol-btn" onclick="openMetaMask()">
           🦊 Open MetaMask to send POL
         </button>
-        <button class="add-pol-btn" onclick="copyWalletAddress()">
-          📋 Copy wallet address
-        </button>
-        <button class="add-pol-btn" onclick="openMoonPay()">
-          💳 Buy POL with card (MoonPay)
-        </button>
+        <div style="color: var(--muted); font-size: 0.65rem; letter-spacing: 0.15em; text-align: center; padding: 0.5rem 0;">OR</div>
+        <div class="add-pol-btn" style="cursor: default; color: var(--muted); border-color: var(--faint);">
+          💳 Buy or send POL from another source
+        </div>
       </div>
-    </div>
 
     <div id="buy-section">
       <button id="connect-apple-btn" onclick="connectWallet('apple')" style="
@@ -572,16 +574,15 @@
   window.copyWalletAddress = function() {
     if (connectedAccount && connectedAccount.address) {
       navigator.clipboard.writeText(connectedAccount.address).then(() => {
+        document.getElementById('copy-confirm').style.display = 'block';
         const btn = document.getElementById('copy-btn');
-        btn.textContent = '✓ COPIED!';
         btn.style.color = 'var(--green)';
         btn.style.borderColor = 'var(--green)';
         setTimeout(() => {
-          btn.textContent = '📋 Copy my wallet address';
+          document.getElementById('copy-confirm').style.display = 'none';
           btn.style.color = '';
           btn.style.borderColor = '';
-        }, 2000);
-        showStatus('Wallet address copied! Send POL then refresh the page.', 'info');
+        }, 3000);
       });
     }
   };
