@@ -454,88 +454,51 @@
     if (appleBtn) { appleBtn.disabled = true; appleBtn.textContent = 'CONNECTING...'; }
     if (googleBtn) { googleBtn.disabled = true; }
 
-    const wallet = inAppWallet();
-    
-    // Try connecting — ignore popup close errors
-    let account;
     try {
-      account = await wallet.connect({ client, strategy, chain: polygon });
-    } catch(e) {
-      // On mobile popup close triggers error — try getting existing session
-      try {
-        account = await wallet.getAccount();
-      } catch(e2) {
-        // Truly failed
-        if (appleBtn) { 
-          appleBtn.innerHTML = '<svg width="18" height="22" viewBox="0 0 18 22" fill="black" xmlns="http://www.w3.org/2000/svg"><path d="M14.8 11.3c0-2.9 2.4-4.3 2.5-4.4-1.4-2-3.5-2.3-4.2-2.3-1.8-.2-3.5 1-4.4 1-.9 0-2.3-1-3.8-1-1.9 0-3.7 1.1-4.7 2.9-2 3.5-.5 8.6 1.4 11.5 1 1.4 2.1 2.9 3.6 2.8 1.4-.1 2-.9 3.7-.9 1.7 0 2.2.9 3.7.9 1.5 0 2.5-1.4 3.5-2.8.7-1 1.3-2.1 1.6-3.2-3.5-1.4-3.4-5.5-.9-5.5zM12.4 3.2c.8-1 1.3-2.3 1.2-3.7-1.2.1-2.6.8-3.4 1.8-.8.9-1.4 2.2-1.2 3.5 1.3.1 2.6-.6 3.4-1.6z"/></svg> Sign in with Apple';
-          appleBtn.disabled = false; 
-        }
-        if (googleBtn) { googleBtn.disabled = false; }
-        return;
-      }
-    }
-
-    if (!account) {
-      // Reset buttons
-      if (appleBtn) { appleBtn.disabled = false; }
-      if (googleBtn) { googleBtn.disabled = false; }
-      return;
-    }
-
-    // Continue with account...
+      const wallet = inAppWallet();
+      const account = await wallet.connect({ client, strategy, chain: polygon });
+      
       connectedAccount = account;
       connectedWallet = wallet;
-
+      
       document.getElementById('wallet-address').textContent = 
-        `${account.address.substring(0,6)}...${account.address.slice(-4)}`;
+        account.address.substring(0,6) + '...' + account.address.slice(-4);
       document.getElementById('wallet-card').classList.add('visible');
+      document.getElementById('status-msg').style.display = 'none';
 
-      // Get POL balance
-      const provider = new ethers.providers.JsonRpcProvider(
-        `https://137.rpc.thirdweb.com/${CLIENT_ID}`
-      );
+      const provider = new ethers.providers.JsonRpcProvider(`https://137.rpc.thirdweb.com/${CLIENT_ID}`);
       const balance = await provider.getBalance(account.address);
       const polBalance = parseFloat(ethers.utils.formatEther(balance));
-      document.getElementById('wallet-balance').textContent = `${polBalance.toFixed(4)} POL`;
+      document.getElementById('wallet-balance').textContent = polBalance.toFixed(4) + ' POL';
 
-      // Check if sufficient
       const priceInPOL = parseFloat(listingData.priceInPOL);
       if (polBalance >= priceInPOL) {
-        document.getElementById('connect-apple-btn').style.display = 'none';
-        document.getElementById('connect-google-btn').style.display = 'none';
+        if (appleBtn) appleBtn.style.display = 'none';
+        if (googleBtn) googleBtn.style.display = 'none';
         document.getElementById('buy-btn').style.display = 'block';
         document.getElementById('insufficient-section').classList.remove('visible');
       } else {
         const needed = (priceInPOL - polBalance).toFixed(4);
         document.getElementById('insufficient-text').textContent = 
-          `You need ${needed} more POL to buy this moment. Current balance: ${polBalance.toFixed(4)} POL`;
+          'You need ' + needed + ' more POL to buy this moment. Current balance: ' + polBalance.toFixed(4) + ' POL';
         document.getElementById('insufficient-section').classList.add('visible');
         if (appleBtn) appleBtn.style.display = 'none';
         if (googleBtn) googleBtn.style.display = 'none';
       }
-
-      // Store wallet address for add POL functions
       window._walletAddress = account.address;
-      document.getElementById('status-msg').style.display = 'none';
-      
+
     } catch(e) {
       console.error('Connect error:', e.message);
-      // On mobile the popup closing triggers an error even on success
-      // Wait briefly then check if we actually connected
-      await new Promise(r => setTimeout(r, 500));
-      if (connectedAccount) {
-        // Connected successfully despite the error — do nothing
-        return;
+      if (!connectedAccount) {
+        if (appleBtn) { 
+          appleBtn.innerHTML = '<svg width="18" height="22" viewBox="0 0 18 22" fill="black" xmlns="http://www.w3.org/2000/svg"><path d="M14.8 11.3c0-2.9 2.4-4.3 2.5-4.4-1.4-2-3.5-2.3-4.2-2.3-1.8-.2-3.5 1-4.4 1-.9 0-2.3-1-3.8-1-1.9 0-3.7 1.1-4.7 2.9-2 3.5-.5 8.6 1.4 11.5 1 1.4 2.1 2.9 3.6 2.8 1.4-.1 2-.9 3.7-.9 1.7 0 2.2.9 3.7.9 1.5 0 2.5-1.4 3.5-2.8.7-1 1.3-2.1 1.6-3.2-3.5-1.4-3.4-5.5-.9-5.5zM12.4 3.2c.8-1 1.3-2.3 1.2-3.7-1.2.1-2.6.8-3.4 1.8-.8.9-1.4 2.2-1.2 3.5 1.3.1 2.6-.6 3.4-1.6z"/></svg> Sign in with Apple';
+          appleBtn.disabled = false; 
+        }
+        if (googleBtn) { googleBtn.disabled = false; }
       }
-      // Real failure
-      if (appleBtn) { 
-        appleBtn.innerHTML = `<svg width="18" height="22" viewBox="0 0 18 22" fill="black" xmlns="http://www.w3.org/2000/svg"><path d="M14.8 11.3c0-2.9 2.4-4.3 2.5-4.4-1.4-2-3.5-2.3-4.2-2.3-1.8-.2-3.5 1-4.4 1-.9 0-2.3-1-3.8-1-1.9 0-3.7 1.1-4.7 2.9-2 3.5-.5 8.6 1.4 11.5 1 1.4 2.1 2.9 3.6 2.8 1.4-.1 2-.9 3.7-.9 1.7 0 2.2.9 3.7.9 1.5 0 2.5-1.4 3.5-2.8.7-1 1.3-2.1 1.6-3.2-3.5-1.4-3.4-5.5-.9-5.5zM12.4 3.2c.8-1 1.3-2.3 1.2-3.7-1.2.1-2.6.8-3.4 1.8-.8.9-1.4 2.2-1.2 3.5 1.3.1 2.6-.6 3.4-1.6z"/></svg> Sign in with Apple`;
-        appleBtn.disabled = false; 
-      }
-      if (googleBtn) { googleBtn.disabled = false; }
     }
   };
-
+  
   // ─── BUY NFT ──────────────────────────────────────────────
   window.buyNFT = async function() {
     const btn = document.getElementById('buy-btn');
