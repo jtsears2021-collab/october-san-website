@@ -455,12 +455,20 @@
     if (googleBtn) { googleBtn.disabled = true; }
 
     try {
-      const wallet = inAppWallet();
-      const account = await wallet.connect({ client, strategy, chain: polygon });
-      
+      let account;
+      for (let i = 0; i < 2; i++) {
+        try {
+          const wallet = inAppWallet();
+          account = await wallet.connect({ client, strategy, chain: polygon });
+          connectedWallet = wallet;
+          break;
+        } catch(e) {
+          if (i === 1) throw e;
+          await new Promise(r => setTimeout(r, 500));
+        }
+      }
+
       connectedAccount = account;
-      connectedWallet = wallet;
-      
       document.getElementById('wallet-address').textContent = 
         account.address.substring(0,6) + '...' + account.address.slice(-4);
       document.getElementById('wallet-card').classList.add('visible');
@@ -480,7 +488,7 @@
       } else {
         const needed = (priceInPOL - polBalance).toFixed(4);
         document.getElementById('insufficient-text').textContent = 
-          'You need ' + needed + ' more POL to buy this moment. Current balance: ' + polBalance.toFixed(4) + ' POL';
+          'You need ' + needed + ' more POL. Current balance: ' + polBalance.toFixed(4) + ' POL';
         document.getElementById('insufficient-section').classList.add('visible');
         if (appleBtn) appleBtn.style.display = 'none';
         if (googleBtn) googleBtn.style.display = 'none';
@@ -489,23 +497,11 @@
 
     } catch(e) {
       console.error('Connect error:', e.message);
-      if (e.message && e.message.includes('pop-up') && !connectedAccount) {
-        // Reset buttons and show tap again message
-        if (appleBtn) { 
-          appleBtn.innerHTML = '<svg width="18" height="22" viewBox="0 0 18 22" fill="black" xmlns="http://www.w3.org/2000/svg"><path d="M14.8 11.3c0-2.9 2.4-4.3 2.5-4.4-1.4-2-3.5-2.3-4.2-2.3-1.8-.2-3.5 1-4.4 1-.9 0-2.3-1-3.8-1-1.9 0-3.7 1.1-4.7 2.9-2 3.5-.5 8.6 1.4 11.5 1 1.4 2.1 2.9 3.6 2.8 1.4-.1 2-.9 3.7-.9 1.7 0 2.2.9 3.7.9 1.5 0 2.5-1.4 3.5-2.8.7-1 1.3-2.1 1.6-3.2-3.5-1.4-3.4-5.5-.9-5.5zM12.4 3.2c.8-1 1.3-2.3 1.2-3.7-1.2.1-2.6.8-3.4 1.8-.8.9-1.4 2.2-1.2 3.5 1.3.1 2.6-.6 3.4-1.6z"/></svg> Sign in with Apple';
-          appleBtn.disabled = false; 
-        }
-        if (googleBtn) { googleBtn.disabled = false; }
-        showStatus('Tap to connect again if needed.', 'info');
-        return;
+      if (appleBtn) { 
+        appleBtn.innerHTML = '<svg width="18" height="22" viewBox="0 0 18 22" fill="black" xmlns="http://www.w3.org/2000/svg"><path d="M14.8 11.3c0-2.9 2.4-4.3 2.5-4.4-1.4-2-3.5-2.3-4.2-2.3-1.8-.2-3.5 1-4.4 1-.9 0-2.3-1-3.8-1-1.9 0-3.7 1.1-4.7 2.9-2 3.5-.5 8.6 1.4 11.5 1 1.4 2.1 2.9 3.6 2.8 1.4-.1 2-.9 3.7-.9 1.7 0 2.2.9 3.7.9 1.5 0 2.5-1.4 3.5-2.8.7-1 1.3-2.1 1.6-3.2-3.5-1.4-3.4-5.5-.9-5.5zM12.4 3.2c.8-1 1.3-2.3 1.2-3.7-1.2.1-2.6.8-3.4 1.8-.8.9-1.4 2.2-1.2 3.5 1.3.1 2.6-.6 3.4-1.6z"/></svg> Sign in with Apple';
+        appleBtn.disabled = false; 
       }
-      if (!connectedAccount) {
-        if (appleBtn) { 
-          appleBtn.innerHTML = '<svg width="18" height="22" viewBox="0 0 18 22" fill="black" xmlns="http://www.w3.org/2000/svg"><path d="M14.8 11.3c0-2.9 2.4-4.3 2.5-4.4-1.4-2-3.5-2.3-4.2-2.3-1.8-.2-3.5 1-4.4 1-.9 0-2.3-1-3.8-1-1.9 0-3.7 1.1-4.7 2.9-2 3.5-.5 8.6 1.4 11.5 1 1.4 2.1 2.9 3.6 2.8 1.4-.1 2-.9 3.7-.9 1.7 0 2.2.9 3.7.9 1.5 0 2.5-1.4 3.5-2.8.7-1 1.3-2.1 1.6-3.2-3.5-1.4-3.4-5.5-.9-5.5zM12.4 3.2c.8-1 1.3-2.3 1.2-3.7-1.2.1-2.6.8-3.4 1.8-.8.9-1.4 2.2-1.2 3.5 1.3.1 2.6-.6 3.4-1.6z"/></svg> Sign in with Apple';
-          appleBtn.disabled = false; 
-        }
-        if (googleBtn) { googleBtn.disabled = false; }
-      }
+      if (googleBtn) { googleBtn.disabled = false; }
     }
   };
   
