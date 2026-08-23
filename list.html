@@ -213,7 +213,7 @@
     <div id="list-section">
       <div class="form-card">
         <label class="form-label">LIST PRICE (USD)</label>
-        <input type="number" class="form-input" id="price-input" placeholder="10.00" min="0.01" step="0.01" />
+        <input type="number" class="form-input" id="price-input" placeholder="ENTER USD PRICE" min="0.01" step="0.01" />
         <div class="price-preview">
           <span class="price-preview-label">APPROX. POL</span>
           <span class="price-preview-value" id="pol-preview">— POL</span>
@@ -283,7 +283,8 @@
 </footer>
 
 <script type="module">
-  import { createThirdwebClient, getContract, prepareContractCall, sendTransaction, defineChain } from 'https://esm.sh/thirdweb@5.120.1';
+  import { createThirdwebClient, getContract, prepareContractCall, sendTransaction } from 'https://esm.sh/thirdweb@5.120.1';
+  import { polygon } from 'https://esm.sh/thirdweb@5.120.1/chains';
   import { inAppWallet } from 'https://esm.sh/thirdweb@5.120.1/wallets';
   import { ethers } from 'https://esm.sh/ethers@5.7.2';
 
@@ -291,7 +292,6 @@
   const CONTRACT_ADDRESS = '0x397160Ad067BaaBa7f35Dd0b7A5C25F836b2539F';
   const MARKETPLACE_ADDRESS = '0xef77CDF9Dc521563270B6aBba379dbc3d389C08c';
   const POL_PRICE_USD = 0.07;
-  const polygon = defineChain(137);
 
   const client = createThirdwebClient({ clientId: CLIENT_ID });
 
