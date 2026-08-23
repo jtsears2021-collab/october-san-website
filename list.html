@@ -396,7 +396,7 @@
       document.getElementById('status-msg').style.display = 'none';
 
     } catch(e) {
-      console.error('Connect error:', e);
+      console.error('Connect error:', e.message, e.code);
       if (!connectedAccount) {
         if (appleBtn) { appleBtn.textContent = 'Sign in with Apple'; appleBtn.disabled = false; }
         if (googleBtn) { googleBtn.disabled = false; }
