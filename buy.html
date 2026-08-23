@@ -317,6 +317,7 @@
 </button>
       <button id="connect-google-btn" class="btn btn-outline" onclick="connectWallet('google')">G  SIGN IN WITH GOOGLE</button>
       <button id="buy-btn" class="btn btn-buy" onclick="buyNFT()" style="display:none;">BUY THIS MOMENT</button>
+      <button id="cancel-listing-btn" class="btn" style="display:none;background:var(--faint);color:var(--text);border:1px solid var(--red);" onclick="cancelListing()">CANCEL LISTING</button>
       <button class="btn btn-outline" onclick="viewOnPolygon()">VIEW ON POLYGON ↗</button>
     </div>
 
@@ -333,6 +334,17 @@
       </div>
       <div class="success-text">Your October-San Moment is permanently recorded on the Polygon blockchain.<br><br>Return to the app to see it in your collection.</div>
       <a id="tx-link" class="tx-link" href="#" target="_blank">VIEW TRANSACTION ON POLYGON ↗</a>
+    </div>
+
+  <div id="cancel-success" style="display:none;text-align:center;padding:2rem 0;">
+      <img src="/icon.png" style="width:80px;height:80px;border-radius:18px;margin-bottom:1.5rem;box-shadow:0 0 0 1px var(--faint),0 0 20px rgba(107,173,232,0.8);" />
+      <div style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.5rem;margin-bottom:1rem;line-height:1.4;">
+        YOUR<br>
+        <span style="color:#E8EDF5;">October-</span><span style="color:var(--sky);">San</span>™<br>
+        LISTING IS CANCELLED.
+      </div>
+      <div style="color:var(--muted);margin-bottom:1.5rem;">Return to the October-San app to view your collection.</div>
+      <a id="cancel-tx-link" href="#" target="_blank" style="color:var(--sky);font-size:0.7rem;letter-spacing:0.1em;text-decoration:none;display:block;margin-bottom:1rem;">VIEW TRANSACTION ON POLYGON ↗</a>
     </div>
 
   <div id="not-found" style="display:none; text-align:center; padding: 3rem; color: var(--muted);">
@@ -501,6 +513,13 @@
       }
       window._walletAddress = account.address;
 
+      // Check if user is the seller — show cancel instead of buy
+      if (listingData?.seller?.toLowerCase() === account.address.toLowerCase()) {
+        document.getElementById('buy-btn').style.display = 'none';
+        document.getElementById('insufficient-section').classList.remove('visible');
+        document.getElementById('cancel-listing-btn').style.display = 'block';
+      }
+
     } catch(e) {
       console.error('Connect error:', e.message);
       if (appleBtn) { 
@@ -611,6 +630,32 @@
     el.textContent = msg;
     el.className = `status-msg ${type}`;
   }
+
+  window.cancelListing = async function() {
+    const btn = document.getElementById('cancel-listing-btn');
+    btn.textContent = 'CANCELLING...';
+    btn.disabled = true;
+    try {
+      const { prepareContractCall, getContract, sendTransaction, defineChain } = await import('https://esm.sh/thirdweb@5.120.1');
+      const polygonChain = defineChain(137);
+      const marketContract = getContract({ client, chain: polygonChain, address: MARKETPLACE_ADDRESS });
+      const cancelTx = prepareContractCall({
+        contract: marketContract,
+        method: 'function cancelListing(uint256 listingId)',
+        params: [BigInt(listingData.listingId)],
+      });
+      const result = await sendTransaction({ transaction: cancelTx, account: connectedAccount });
+      document.getElementById('nft-content').style.display = 'none';
+      document.getElementById('cancel-success').style.display = 'block';
+      const txHash = result.transactionHash || result.hash || '';
+      document.getElementById('cancel-tx-link').href = 'https://polygonscan.com/tx/' + txHash;
+    } catch(e) {
+      console.error('Cancel error:', e);
+      showStatus('Could not cancel listing. Please try again.', 'error');
+      btn.textContent = 'CANCEL LISTING';
+      btn.disabled = false;
+    }
+  };
 
   // ─── INIT ─────────────────────────────────────────────────
   loadNFT();
