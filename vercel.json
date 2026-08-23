@@ -4,5 +4,6 @@
     { "source": "/terms", "destination": "/terms.html" },
     { "source": "/admin", "destination": "/admin.html" },
     { "source": "/buy/:tokenId", "destination": "/buy.html" }
+    { "source": "/list/:tokenId", "destination": "/list.html" }
   ]
 }
