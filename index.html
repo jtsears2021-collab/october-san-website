@@ -731,9 +731,11 @@
       }
       
       const listings = await marketplace.getAllListings(0, total.sub(1));
+      const now = Math.floor(Date.now() / 1000);
       const active = listings.filter(l => 
-        l.status === 1 && 
-        l.assetContract.toLowerCase() === CONTRACT_ADDRESS.toLowerCase()
+        parseInt(l.status) === 1 && 
+        l.assetContract.toLowerCase() === CONTRACT_ADDRESS.toLowerCase() &&
+        parseInt(l.endTimestamp) > now
       ).slice(0, 10);
 
       if (active.length === 0) {
