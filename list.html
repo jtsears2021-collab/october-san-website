@@ -263,10 +263,12 @@
 
   <div id="success-screen" class="success-screen">
     <img src="/icon.png" style="width:80px;height:80px;border-radius:18px;margin-bottom:1.5rem;box-shadow:0 0 0 1px var(--faint),0 0 20px rgba(107,173,232,0.8);" />
-    <div style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.5rem;margin-bottom:1rem;line-height:1.4;">
-      YOUR<br>
-      <span style="color:#E8EDF5;">October-</span><span style="color:var(--sky);">San</span>™<br>
-      MOMENT IS LISTED.
+    <div style="margin-bottom:1rem;line-height:1.6;text-align:center;">
+      <div style="font-family:'DM Mono',monospace;font-size:11px;letter-spacing:3px;color:var(--text);margin-bottom:8px;">YOUR</div>
+      <div style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:2rem;">
+        <span style="color:#E8EDF5;">October-</span><span style="color:var(--sky);">San</span>™
+      </div>
+      <div style="font-family:'DM Mono',monospace;font-size:11px;letter-spacing:3px;color:var(--text);margin-top:8px;">MOMENT IS LISTED.</div>
     </div>
     <div style="color:var(--muted);margin-bottom:1.5rem;line-height:1.6;">Your moment is now live on the October-San marketplace.<br>Open the app to manage your listing.</div>
     <a id="tx-link" style="color:var(--sky);font-size:0.7rem;letter-spacing:0.1em;text-decoration:none;display:block;margin-bottom:1rem;" href="#" target="_blank">VIEW TRANSACTION ON POLYGON ↗</a>
@@ -399,7 +401,7 @@
     const usdPrice = parseFloat(document.getElementById('price-input').value);
     if (!usdPrice || usdPrice <= 0) { showStatus('Please enter a price.', 'error'); return; }
     const btn = document.getElementById('list-btn');
-    btn.textContent = 'LISTING...';
+    btn.textContent = 'STEP 1 OF 2...';
     btn.disabled = true;
     showStatus('Approving marketplace...', 'info');
     try {
@@ -415,6 +417,8 @@
         params: [MARKETPLACE_ADDRESS, true],
       });
       await sendTransaction({ transaction: approveTx, account: connectedAccount });
+      
+      btn.textContent = 'STEP 2 OF 2...';
       showStatus('Creating listing...', 'info');
 
       const marketContract = getContract({ client, chain: polygon, address: MARKETPLACE_ADDRESS });
