@@ -454,14 +454,35 @@
     if (appleBtn) { appleBtn.disabled = true; appleBtn.textContent = 'CONNECTING...'; }
     if (googleBtn) { googleBtn.disabled = true; }
 
+    const wallet = inAppWallet();
+    
+    // Try connecting — ignore popup close errors
+    let account;
     try {
-      const wallet = inAppWallet();
-      const account = await wallet.connect({
-        client,
-        strategy: strategy,
-        chain: polygon,
-      });
+      account = await wallet.connect({ client, strategy, chain: polygon });
+    } catch(e) {
+      // On mobile popup close triggers error — try getting existing session
+      try {
+        account = await wallet.getAccount();
+      } catch(e2) {
+        // Truly failed
+        if (appleBtn) { 
+          appleBtn.innerHTML = `<svg...>Sign in with Apple`;
+          appleBtn.disabled = false; 
+        }
+        if (googleBtn) { googleBtn.disabled = false; }
+        return;
+      }
+    }
 
+    if (!account) {
+      // Reset buttons
+      if (appleBtn) { appleBtn.disabled = false; }
+      if (googleBtn) { googleBtn.disabled = false; }
+      return;
+    }
+
+    // Continue with account...
       connectedAccount = account;
       connectedWallet = wallet;
 
