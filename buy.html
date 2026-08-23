@@ -224,7 +224,9 @@
   
 <nav>
   <a href="/" class="logo">October-<span>San</span>™</a>
-  <div style="color: var(--text); font-size: 9px; letter-spacing: 2px; font-family: 'DM Mono', monospace;">SCROLL DOWN TO BUY OR MANAGE LISTING ↓</div>
+  <div id="scroll-hint" style="color: var(--text); font-size: 9px; letter-spacing: 2px; font-family: 'DM Mono', monospace; text-align: right; line-height: 1.6;">
+  SCROLL DOWN TO BUY<br>OR MANAGE LISTING ↓
+</div>
 </nav>
 
 <main>
@@ -650,6 +652,7 @@
       const result = await sendTransaction({ transaction: cancelTx, account: connectedAccount });
       document.getElementById('nft-content').style.display = 'none';
       document.getElementById('cancel-success').style.display = 'block';
+      document.getElementById('cancel-listing-btn').style.display = 'none';
       document.getElementById('status-msg').style.display = 'none';
       document.getElementById('scroll-hint').style.display = 'none';
       const txHash = result.transactionHash || result.hash || '';
