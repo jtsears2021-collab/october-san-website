@@ -270,9 +270,8 @@
       </div>
       <div style="font-family:'DM Mono',monospace;font-size:11px;letter-spacing:3px;color:var(--text);margin-top:8px;">MOMENT IS LISTED.</div>
     </div>
-    <div style="color:var(--muted);margin-bottom:1.5rem;line-height:1.6;">Your moment is now live on the October-San marketplace.<br>Open the app to manage your listing.</div>
+    <div style="color:var(--muted);margin-bottom:1.5rem;">Return to the October-San app to view your collection.</div>
     <a id="tx-link" style="color:var(--sky);font-size:0.7rem;letter-spacing:0.1em;text-decoration:none;display:block;margin-bottom:1rem;" href="#" target="_blank">VIEW TRANSACTION ON POLYGON ↗</a>
-    <a href="/" style="color:var(--sky);font-size:0.75rem;letter-spacing:0.1em;">← BROWSE MARKETPLACE</a>
   </div>
 
   <div id="not-found" style="display:none;text-align:center;padding:3rem;color:var(--muted);">
@@ -440,6 +439,7 @@
 
       document.getElementById('nft-content').style.display = 'none';
       document.getElementById('success-screen').classList.add('visible');
+      document.getElementById('scroll-hint').style.display = 'none';
       const txHash = result.transactionHash || result.hash || '';
       document.getElementById('tx-link').href = 'https://polygonscan.com/tx/' + txHash;
 
