@@ -288,7 +288,7 @@
     </div>
 
     <div id="buy-section">
-      <div style="color: var(--muted); font-size: 0.65rem; letter-spacing: 0.15em; text-align: center; margin-bottom: 12px;">
+      <div id="auth-hint" style="color: var(--text); font-size: 0.65rem; letter-spacing: 0.15em; text-align: center; margin-bottom: 12px;">
         TAP SIGN-IN TWICE TO AUTHENTICATE YOUR OCTOBER-SAN WALLET
       </div>
       <button id="connect-apple-btn" onclick="connectWallet('apple')" style="
@@ -476,6 +476,8 @@
         account.address.substring(0,6) + '...' + account.address.slice(-4);
       document.getElementById('wallet-card').classList.add('visible');
       document.getElementById('status-msg').style.display = 'none';
+      const authHint = document.getElementById('auth-hint');
+      if (authHint) authHint.style.display = 'none';
 
       const provider = new ethers.providers.JsonRpcProvider(`https://137.rpc.thirdweb.com/${CLIENT_ID}`);
       const balance = await provider.getBalance(account.address);
