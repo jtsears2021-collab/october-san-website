@@ -447,27 +447,23 @@
       document.querySelector('.scroll-hint').style.display = 'none';
       document.getElementById('tx-link').href = txHash ? 'https://polygonscan.com/tx/' + txHash : 'https://polygonscan.com';
 
-      // Then save caption (non-blocking)
+      // Then save caption (non-blocking, fire and forget)
       if (caption) {
-        try {
-          await fetch(
-            `https://firestore.googleapis.com/v1/projects/october-san-e3a33/databases/(default)/documents/listings/${tokenId}`,
-            {
-              method: 'PATCH',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                fields: {
-                  caption: { stringValue: caption },
-                  tokenId: { stringValue: tokenId },
-                  listedAt: { stringValue: new Date().toISOString() },
-                  seller: { stringValue: connectedAccount.address }
-                }
-              })
-            }
-          );
-        } catch(e) {
-          console.log('Caption save error:', e.message);
-        }
+        fetch(
+          `https://firestore.googleapis.com/v1/projects/october-san-e3a33/databases/(default)/documents/listings/${tokenId}`,
+          {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              fields: {
+                caption: { stringValue: caption },
+                tokenId: { stringValue: tokenId },
+                listedAt: { stringValue: new Date().toISOString() },
+                seller: { stringValue: connectedAccount.address }
+              }
+            })
+          }
+        ).catch(e => console.log('Caption save error:', e.message));
       }
 
     } catch(e) {
