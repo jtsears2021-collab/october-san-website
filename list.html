@@ -441,7 +441,13 @@
       const txHash = result.transactionHash || result.hash || '';
       const caption = document.getElementById('caption-input').value.trim();
       
-            // Store caption in Firebase if provided
+            // Show success first
+      document.getElementById('nft-content').style.display = 'none';
+      document.getElementById('success-screen').classList.add('visible');
+      document.querySelector('.scroll-hint').style.display = 'none';
+      document.getElementById('tx-link').href = txHash ? 'https://polygonscan.com/tx/' + txHash : 'https://polygonscan.com';
+
+      // Then save caption (non-blocking)
       if (caption) {
         try {
           await fetch(
@@ -463,11 +469,6 @@
           console.log('Caption save error:', e.message);
         }
       }
-      console.log('List tx hash:', txHash);
-      document.getElementById('tx-link').href = txHash ? 'https://polygonscan.com/tx/' + txHash : 'https://polygonscan.com';
-      document.getElementById('nft-content').style.display = 'none';
-      document.getElementById('success-screen').classList.add('visible');
-      document.querySelector('.scroll-hint').style.display = 'none';
 
     } catch(e) {
       console.error('List error:', e);
