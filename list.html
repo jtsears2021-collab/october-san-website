@@ -440,7 +440,7 @@
       document.getElementById('tx-link').href = txHash ? 'https://polygonscan.com/tx/' + txHash : 'https://polygonscan.com';
       document.getElementById('nft-content').style.display = 'none';
       document.getElementById('success-screen').classList.add('visible');
-      document.getElementById('scroll-hint').style.display = 'none';
+      document.querySelector('.scroll-hint').style.display = 'none';
 
     } catch(e) {
       console.error('List error:', e);
