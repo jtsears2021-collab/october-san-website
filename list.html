@@ -441,23 +441,27 @@
       const txHash = result.transactionHash || result.hash || '';
       const caption = document.getElementById('caption-input').value.trim();
       
-      // Store caption in Firebase if provided
+            // Store caption in Firebase if provided
       if (caption) {
-        await fetch(
-          `https://firestore.googleapis.com/v1/projects/october-san-e3a33/databases/(default)/documents/listings/${tokenId}`,
-          {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              fields: {
-                caption: { stringValue: caption },
-                tokenId: { stringValue: tokenId },
-                listedAt: { stringValue: new Date().toISOString() },
-                seller: { stringValue: connectedAccount.address }
-              }
-            })
-          }
-        );
+        try {
+          await fetch(
+            `https://firestore.googleapis.com/v1/projects/october-san-e3a33/databases/(default)/documents/listings/${tokenId}`,
+            {
+              method: 'PATCH',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                fields: {
+                  caption: { stringValue: caption },
+                  tokenId: { stringValue: tokenId },
+                  listedAt: { stringValue: new Date().toISOString() },
+                  seller: { stringValue: connectedAccount.address }
+                }
+              })
+            }
+          );
+        } catch(e) {
+          console.log('Caption save error:', e.message);
+        }
       }
       console.log('List tx hash:', txHash);
       document.getElementById('tx-link').href = txHash ? 'https://polygonscan.com/tx/' + txHash : 'https://polygonscan.com';
