@@ -471,8 +471,8 @@
       }
 
     } catch(e) {
-      console.error('List error:', e);
-      showStatus('Listing failed. Please try again.', 'error');
+      console.error('List error:', e.message, e.stack);
+      showStatus('Listing failed: ' + e.message, 'error');
       btn.textContent = 'LIST ON OCTOBER-SAN';
       btn.disabled = false;
     }
