@@ -295,7 +295,7 @@
     } else {
       priceAsc = !priceAsc;
       currentSort = priceAsc ? 'price-asc' : 'price-desc';
-      document.getElementById('sort-price').textContent = priceAsc ? 'PRICE LOW ↓' : 'PRICE HIGH ↓';
+      document.getElementById('sort-price').textContent = priceAsc ? 'PRICE ↑' : 'PRICE ↓';
       document.getElementById('sort-price').classList.add('active');
     }
     renderGrid();
