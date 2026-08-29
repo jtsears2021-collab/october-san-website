@@ -253,10 +253,8 @@
 </header>
 
 <div class="filters">
-  <button class="filter-btn active" onclick="setSort('newest')" id="sort-newest">NEWEST ↓</button>
-  <button class="filter-btn" onclick="setSort('oldest')" id="sort-oldest">OLDEST ↑</button>
-  <button class="filter-btn" onclick="setSort('price-asc')" id="sort-price-asc">PRICE ↑</button>
-  <button class="filter-btn" onclick="setSort('price-desc')" id="sort-price-desc">PRICE ↓</button>
+  <button class="filter-btn active" onclick="toggleSort('date')" id="sort-date">NEWEST ↓</button>
+  <button class="filter-btn" onclick="toggleSort('price')" id="sort-price">PRICE ↓</button>
   <span class="results-count" id="results-count"></span>
   <input type="search" class="search-input" placeholder="Search moments..." id="search-input" oninput="filterGrid()" />
 </div>
@@ -274,7 +272,7 @@
   <span>© 2026 OCTOBER-SAN LLC</span>
   <a href="/terms">TERMS</a>
   <a href="/privacy">PRIVACY</a>
-  <a href="https://app.october-san.com">GET THE APP</a>
+  <a href="https://app.october-san.com" target="_blank">GET THE APP</a>
 </footer>
 
 <script>
@@ -284,6 +282,24 @@
 
   let allListings = [];
   let currentSort = 'newest';
+  let dateAsc = false;
+  let priceAsc = false;
+
+  function toggleSort(type) {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    if (type === 'date') {
+      dateAsc = !dateAsc;
+      currentSort = dateAsc ? 'oldest' : 'newest';
+      document.getElementById('sort-date').textContent = dateAsc ? 'OLDEST ↓' : 'NEWEST ↓';
+      document.getElementById('sort-date').classList.add('active');
+    } else {
+      priceAsc = !priceAsc;
+      currentSort = priceAsc ? 'price-asc' : 'price-desc';
+      document.getElementById('sort-price').textContent = priceAsc ? 'PRICE LOW ↓' : 'PRICE HIGH ↓';
+      document.getElementById('sort-price').classList.add('active');
+    }
+    renderGrid();
+  }
 
   async function loadMarketplace() {
     try {
@@ -410,6 +426,12 @@
   }
 
   loadMarketplace();
+  // Only show tap-twice hint on mobile
+  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+  if (!isMobile) {
+    const hint = document.getElementById('auth-hint');
+    if (hint) hint.style.display = 'none';
+  }
 </script>
 
 </body>
