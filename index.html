@@ -133,7 +133,7 @@
 
     .nft-card {
       scroll-snap-align: start;
-      height: calc(100dvh - 100px);
+      height: calc(100dvh - 65px);
       position: relative;
       background: var(--black);
       border-bottom: 1px solid var(--faint);
@@ -498,20 +498,13 @@
 <!-- MAIN APP -->
 <div id="app">
 
-  <!-- HEADER -->
-  <div id="header">
-    <div class="header-top">
-      <a class="logo">October-<span>San</span>™</a>
-      <span class="header-username" id="header-username"></span>
-    </div>
-  </div>
-
   <!-- MINT HERO (sticky) -->
   <div id="mint-hero" style="display:flex;align-items:center;gap:12px;padding:10px 16px;border-bottom:1px solid var(--faint);background:var(--black);">
     <div class="mint-icon-wrap" style="margin-bottom:0;flex-shrink:0;">
       <img src="/icon.png" alt="October-San" style="width:44px;height:44px;border-radius:10px;display:block;" />
     </div>
     <button class="mint-btn" onclick="goMint()" style="flex:1;padding:12px;">TAP TO MINT YOUR MOMENT</button>
+    <span id="header-username" style="color:var(--muted);font-size:9px;letter-spacing:1px;white-space:nowrap;"></span>
   </div>
 
   <!-- FEED -->
