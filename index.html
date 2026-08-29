@@ -623,9 +623,9 @@
       }
 
       console.log('Looking up wallet:', account.address);
-      // Look up username via wallet address
+      // Look up username via wallet address (lowercase)
       try {
-        const data = await firebaseGet(`walletLookup/${account.address}`);
+        const data = await firebaseGet(`walletLookup/${account.address.toLowerCase()}`);
         if (data.fields?.username) {
           const username = parseField(data.fields.username);
           currentUser = { userId: account.address, username, provider: strategy, walletAddress: account.address };
@@ -683,7 +683,7 @@
     await firebaseSet(`usernames/${username}`, {
       userId: { stringValue: userId }
     });
-    await firebaseSet(`walletLookup/${currentUser.walletAddress}`, {
+    await firebaseSet(`walletLookup/${currentUser.walletAddress.toLowerCase()}`, {
       username: { stringValue: username }
     });
 
