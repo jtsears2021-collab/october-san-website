@@ -631,8 +631,19 @@
       connectedAccount = account;
       connectedWallet = wallet;
 
+      // Get auth token to extract userId (same as native app)
+      let userId = account.address;
+      try {
+        const authToken = await wallet.getAuthToken();
+        if (authToken) {
+          const payload = JSON.parse(atob(authToken.split('.')[1]));
+          if (payload.sub) userId = payload.sub;
+        }
+      } catch(e) {
+        console.log('Auth token parse:', e.message);
+      }
+
       // Check for existing profile
-      const userId = account.address;
       try {
         const data = await firebaseGet(`users/${userId}`);
         if (data.fields?.username) {
