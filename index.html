@@ -640,13 +640,6 @@
       currentUser = { userId: account.address, provider: strategy, walletAddress: account.address };
       document.getElementById('signin-overlay').classList.add('hidden');
       document.getElementById('onboarding-overlay').classList.remove('hidden');
-        }
-      } catch(e) {}
-
-      // New user — show onboarding
-      currentUser = { userId, provider: strategy, walletAddress: account.address };
-      document.getElementById('signin-overlay').classList.add('hidden');
-      document.getElementById('onboarding-overlay').classList.remove('hidden');
 
     } catch(e) {
       console.error('Sign in error:', e.message);
