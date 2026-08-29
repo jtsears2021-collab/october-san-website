@@ -622,6 +622,7 @@
         console.log('getUser error:', e.message);
       }
 
+      console.log('Looking up wallet:', account.address);
       // Look up username via wallet address
       try {
         const data = await firebaseGet(`walletLookup/${account.address}`);
