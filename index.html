@@ -74,11 +74,6 @@
     #mint-hero {
       flex-shrink: 0;
       background: var(--black);
-      padding: 20px 16px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      border-bottom: 1px solid var(--faint);
       z-index: 99;
     }
     .mint-icon-wrap {
@@ -513,14 +508,11 @@
   </div>
 
   <!-- MINT HERO (sticky) -->
-  <div id="mint-hero">
-    <div class="mint-icon-wrap">
-      <img src="/icon.png" alt="October-San" />
+  <div id="mint-hero" style="display:flex;align-items:center;gap:12px;padding:10px 16px;border-bottom:1px solid var(--faint);background:var(--black);">
+    <div class="mint-icon-wrap" style="margin-bottom:0;flex-shrink:0;">
+      <img src="/icon.png" alt="October-San" style="width:44px;height:44px;border-radius:10px;display:block;" />
     </div>
-    <div class="hero-title">MINT AN</div>
-    <div class="hero-script">October-<span>San</span>™</div>
-    <div class="hero-sub">MOMENT.</div>
-    <button class="mint-btn" onclick="goMint()">TAP TO MINT YOUR MOMENT</button>
+    <button class="mint-btn" onclick="goMint()" style="flex:1;padding:12px;">TAP TO MINT YOUR MOMENT</button>
   </div>
 
   <!-- FEED -->
