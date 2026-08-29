@@ -4,7 +4,7 @@
     { "source": "/terms", "destination": "/terms.html" },
     { "source": "/admin", "destination": "/admin.html" },
     { "source": "/buy/:tokenId", "destination": "/buy.html" },
-    { "source": "/list/:tokenId", "destination": "/list.html" }
+    { "source": "/list/:tokenId", "destination": "/list.html" },
     { "source": "/daily", "destination": "/daily.html" },
     { "source": "/my", "destination": "/my.html" },
     { "source": "/profile", "destination": "/profile.html" },
