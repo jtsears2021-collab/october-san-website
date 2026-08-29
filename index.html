@@ -615,6 +615,13 @@
       connectedAccount = account;
       connectedWallet = wallet;
 
+      try {
+        const user = await wallet.getUser();
+        console.log('Wallet user:', JSON.stringify(user));
+      } catch(e) {
+        console.log('getUser error:', e.message);
+      }
+
       // Get auth token to extract userId (same as native app)
       let userId = account.address;
       try {
