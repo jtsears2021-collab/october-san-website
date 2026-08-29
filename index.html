@@ -765,31 +765,22 @@
         // Get owner
         let ownerAddress = '';
         let ownerUsername = '—';
-        try {
-          const ownerRes = await fetch(
-            `https://137.insight.thirdweb.com/v1/nfts/${CONTRACT_ADDRESS}/${tokenId}/owners`,
-            { headers: { 'x-client-id': CLIENT_ID } }
-          );
-          const ownerData = await ownerRes.json();
-          ownerAddress = ownerData.data?.[0]?.owner_address || '';
-          
-          if (ownerAddress && !userCache[ownerAddress]) {
-            try {
-              // Look up username by wallet address
-              const userRes = await fetch(
-                `${FIREBASE_URL}/users/${ownerAddress}?key=${FIREBASE_API_KEY}`
-              );
-              const userData = await userRes.json();
-              userCache[ownerAddress] = parseField(userData.fields?.username) || ownerAddress.substring(0,6) + '...' + ownerAddress.slice(-4);
-            } catch(e) {
-              userCache[ownerAddress] = ownerAddress.substring(0,6) + '...' + ownerAddress.slice(-4);
-            }
+        ownerAddress = nft.owner_addresses?.[0] || '';
+        
+        if (ownerAddress && !userCache[ownerAddress]) {
+          try {
+            const userRes = await fetch(
+              `${FIREBASE_URL}/users/${ownerAddress}?key=${FIREBASE_API_KEY}`
+            );
+            const userData = await userRes.json();
+            userCache[ownerAddress] = parseField(userData.fields?.username) || ownerAddress.substring(0,6) + '...' + ownerAddress.slice(-4);
+          } catch(e) {
+            userCache[ownerAddress] = ownerAddress.substring(0,6) + '...' + ownerAddress.slice(-4);
           }
-          ownerUsername = userCache[ownerAddress] || ownerAddress.substring(0,6) + '...' + ownerAddress.slice(-4);
-        } catch(e) {}
-
+        }
+        ownerUsername = userCache[ownerAddress] || ownerAddress.substring(0,6) + '...' + ownerAddress.slice(-4);
+        
         const isOwner = currentUser?.walletAddress?.toLowerCase() === ownerAddress?.toLowerCase();
-
         return { tokenId, imageUrl, isVideo, isListed, priceInPOL, priceInUSD, listingId, seller, ownerAddress, ownerUsername, isOwner, name: nft.name };
       }));
 
