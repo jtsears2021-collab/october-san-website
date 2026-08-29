@@ -667,6 +667,12 @@
 
   // ─── INIT ─────────────────────────────────────────────────
   loadNFT();
+  // Only show tap-twice hint on mobile
+  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+  if (!isMobile) {
+    const hint = document.getElementById('auth-hint');
+    if (hint) hint.style.display = 'none';
+  }
 </script>
 
 </body>
