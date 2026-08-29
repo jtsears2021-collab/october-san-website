@@ -2,808 +2,866 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>October-San — Mint an October-San Moment</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="October-San">
+  <meta name="theme-color" content="#080A0E">
+  <title>October-San</title>
+  <link rel="manifest" href="/manifest.json">
+  <link rel="apple-touch-icon" href="/icon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Mono:wght@300;400&family=Bebas+Neue&display=swap" rel="stylesheet">
-  <!-- Thirdweb SDK -->
-  <script src="https://cdn.jsdelivr.net/npm/thirdweb@5.88.4/dist/thirdweb.umd.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
     :root {
       --sky: #6BADE8;
-      --sky-light: #9FCBF0;
-      --sky-dim: rgba(107, 173, 232, 0.15);
-      --sky-border: rgba(107, 173, 232, 0.3);
       --black: #080A0E;
       --dark: #0D1117;
       --card: #111620;
-      --card2: #161C28;
       --text: #E8EDF5;
       --muted: #6B7A99;
       --faint: #2A3347;
+      --green: #6BE8A0;
+      --red: #E86B6B;
     }
-
-    html { scroll-behavior: smooth; }
-
-    body {
+    html, body {
+      height: 100%;
       background: var(--black);
       color: var(--text);
       font-family: 'DM Mono', monospace;
-      font-weight: 300;
-      overflow-x: hidden;
+      overscroll-behavior: none;
     }
-
-    body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
-      pointer-events: none;
-      z-index: 1000;
-      opacity: 0.4;
-    }
-
-    /* NAV */
-    nav {
-      position: fixed;
-      top: 0; left: 0; right: 0;
-      z-index: 100;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 1.5rem 3rem;
-      background: rgba(8, 10, 14, 0.85);
-      backdrop-filter: blur(20px);
-      border-bottom: 1px solid var(--faint);
-    }
-
-    .nav-logo {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 1.6rem;
-      font-weight: 300;
-      font-style: italic;
-      color: var(--text);
-      letter-spacing: 0.02em;
-      text-decoration: none;
-    }
-    .nav-logo span { color: var(--sky); }
-
-    .nav-links { display: flex; align-items: center; gap: 2.5rem; list-style: none; }
-    .nav-links a { color: var(--muted); text-decoration: none; font-size: 0.7rem; letter-spacing: 0.15em; text-transform: uppercase; transition: color 0.2s; }
-    .nav-links a:hover { color: var(--sky); }
-    .nav-cta { background: transparent; border: 1px solid var(--sky-border); color: var(--sky) !important; padding: 0.5rem 1.2rem; border-radius: 2px; transition: background 0.2s !important; }
-    .nav-cta:hover { background: var(--sky-dim) !important; }
-
-    /* HERO */
-    .hero {
-      min-height: 100vh;
+    
+    /* ─── APP SHELL ─── */
+    #app {
       display: flex;
       flex-direction: column;
-      justify-content: center;
-      padding: 8rem 3rem 4rem;
-      position: relative;
+      height: 100vh;
+      height: 100dvh;
       overflow: hidden;
     }
 
-    .hero-glow {
-      position: absolute; top: -20%; right: -10%;
-      width: 600px; height: 600px;
-      background: radial-gradient(circle, rgba(107, 173, 232, 0.12) 0%, transparent 70%);
+    /* ─── STICKY HEADER ─── */
+    #header {
+      flex-shrink: 0;
+      background: var(--black);
+      border-bottom: 1px solid var(--faint);
+      padding: 12px 16px 0;
+      z-index: 100;
+    }
+    .header-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    .logo {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.4rem;
+      font-style: italic;
+      color: var(--text);
+      text-decoration: none;
+    }
+    .logo span { color: var(--sky); }
+    .header-username {
+      font-size: 10px;
+      letter-spacing: 2px;
+      color: var(--muted);
+    }
+
+    /* ─── MINT HERO (sticky) ─── */
+    #mint-hero {
+      flex-shrink: 0;
+      background: var(--black);
+      padding: 20px 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      border-bottom: 1px solid var(--faint);
+      z-index: 99;
+    }
+    .mint-icon-wrap {
+      box-shadow: 0 0 0 1px var(--faint), 0 0 24px rgba(107,173,232,0.8);
+      border-radius: 22px;
+      margin-bottom: 16px;
+    }
+    .mint-icon-wrap img {
+      width: 80px;
+      height: 80px;
+      border-radius: 22px;
+      display: block;
+    }
+    .hero-title {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 3px;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+    .hero-script {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-size: 1.6rem;
+      margin-bottom: 4px;
+    }
+    .hero-script span { color: var(--sky); }
+    .hero-sub {
+      font-size: 10px;
+      letter-spacing: 3px;
+      color: var(--text);
+      margin-bottom: 16px;
+    }
+    .mint-btn {
+      background: var(--sky);
+      color: var(--black);
+      border: none;
+      border-radius: 4px;
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      padding: 14px 32px;
+      cursor: pointer;
+      width: 100%;
+      max-width: 360px;
+    }
+    .mint-btn:active { opacity: 0.85; }
+
+    /* ─── FEED ─── */
+    #feed {
+      flex: 1;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      scroll-snap-type: y mandatory;
+    }
+
+    .nft-card {
+      scroll-snap-align: start;
+      height: 100%;
+      min-height: 100%;
+      position: relative;
+      background: var(--black);
+      border-bottom: 1px solid var(--faint);
+    }
+
+    .nft-card-media {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .nft-card video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .nft-card-overlay {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 20px 16px 24px;
+      background: linear-gradient(transparent, rgba(8,10,14,0.9));
+    }
+
+    .nft-card-user {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+      cursor: pointer;
+    }
+
+    .user-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--card);
+      border: 1px solid var(--sky);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      color: var(--sky);
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .user-info { flex: 1; }
+    .user-name {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: 1px;
+    }
+    .nft-name {
+      font-size: 10px;
+      color: var(--muted);
+      letter-spacing: 0.5px;
+    }
+
+    .nft-card-token {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      background: rgba(8,10,14,0.7);
+      color: var(--sky);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      padding: 4px 10px;
+      border-radius: 4px;
+    }
+
+    .nft-card-actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .btn-buy {
+      background: var(--green);
+      color: var(--black);
+      border: none;
+      border-radius: 4px;
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      padding: 10px 20px;
+      cursor: pointer;
+      flex: 1;
+    }
+
+    .btn-list {
+      background: transparent;
+      color: var(--sky);
+      border: 1px solid var(--sky);
+      border-radius: 4px;
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      padding: 10px 20px;
+      cursor: pointer;
+      flex: 1;
+      text-decoration: none;
+      text-align: center;
+    }
+
+    .price-tag {
+      background: rgba(8,10,14,0.8);
+      color: var(--text);
+      font-size: 11px;
+      font-weight: 700;
+      padding: 6px 12px;
+      border-radius: 4px;
+      border: 1px solid var(--faint);
+    }
+
+    .listed-border {
+      position: absolute;
+      inset: 0;
+      border: 2px solid var(--sky);
       pointer-events: none;
     }
 
-    .hero-label {
-      font-size: 0.65rem; letter-spacing: 0.25em; text-transform: uppercase;
-      color: var(--sky); margin-bottom: 1.5rem;
-      display: flex; align-items: center; gap: 0.8rem;
-      opacity: 0; animation: fadeUp 0.8s ease forwards 0.2s;
+    /* ─── LOADING ─── */
+    .feed-loading {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 300px;
+      gap: 16px;
+      color: var(--muted);
+      font-size: 11px;
+      letter-spacing: 2px;
     }
-    .hero-label::before { content: ''; display: block; width: 24px; height: 1px; background: var(--sky); }
-
-    .hero-title {
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: clamp(5rem, 12vw, 11rem);
-      line-height: 0.9; letter-spacing: 0.02em;
-      color: var(--text); margin-bottom: 1rem;
-      opacity: 0; animation: fadeUp 0.8s ease forwards 0.4s;
+    .spinner {
+      width: 24px;
+      height: 24px;
+      border: 2px solid var(--faint);
+      border-top-color: var(--sky);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
     }
-    .hero-title .accent { color: var(--sky); }
+    @keyframes spin { to { transform: rotate(360deg); } }
 
-    .hero-subtitle {
+    /* ─── SIGN IN OVERLAY ─── */
+    #signin-overlay {
+      position: fixed;
+      inset: 0;
+      background: var(--black);
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+    #signin-overlay.hidden { display: none; }
+
+    .signin-icon-wrap {
+      box-shadow: 0 0 0 1px var(--faint), 0 0 24px rgba(107,173,232,0.8);
+      border-radius: 22px;
+      margin-bottom: 20px;
+    }
+    .signin-icon-wrap img {
+      width: 90px;
+      height: 90px;
+      border-radius: 22px;
+      display: block;
+    }
+    .signin-logo {
       font-family: 'Cormorant Garamond', serif;
-      font-size: clamp(1.4rem, 3vw, 2.2rem);
-      font-weight: 300; font-style: italic;
-      color: var(--muted); margin-bottom: 1rem;
-      max-width: 600px; line-height: 1.4;
-      opacity: 0; animation: fadeUp 0.8s ease forwards 0.6s;
+      font-style: italic;
+      font-size: 2rem;
+      margin-bottom: 32px;
     }
+    .signin-logo span { color: var(--sky); }
 
-    .hero-subtitle-2 {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: clamp(1rem, 2vw, 1.4rem);
-      font-weight: 300; font-style: italic;
-      color: var(--muted); margin-bottom: 3rem;
-      max-width: 600px; line-height: 1.4;
-      opacity: 0; animation: fadeUp 0.8s ease forwards 0.7s;
-    }
-
-    .hero-actions {
-      display: flex; gap: 1rem; align-items: center;
-      opacity: 0; animation: fadeUp 0.8s ease forwards 0.8s;
-    }
-
-    .btn-primary {
-      background: var(--sky); color: var(--black);
-      padding: 0.9rem 2.2rem;
-      font-family: 'DM Mono', monospace; font-size: 0.72rem; font-weight: 400;
-      letter-spacing: 0.12em; text-transform: uppercase;
-      border: none; border-radius: 2px; cursor: pointer;
-      text-decoration: none; display: inline-block;
-      transition: background 0.2s, transform 0.15s;
-    }
-    .btn-primary:hover { background: var(--sky-light); transform: translateY(-1px); }
-
-    .btn-secondary {
-      background: transparent; color: var(--text);
-      padding: 0.9rem 2.2rem;
-      font-family: 'DM Mono', monospace; font-size: 0.72rem;
-      letter-spacing: 0.12em; text-transform: uppercase;
-      border: 1px solid var(--faint); border-radius: 2px; cursor: pointer;
-      text-decoration: none; display: inline-block;
-      transition: border-color 0.2s, color 0.2s;
-    }
-    .btn-secondary:hover { border-color: var(--sky-border); color: var(--sky); }
-
-    .hero-stats {
-      position: absolute; bottom: 3rem; right: 3rem;
-      display: flex; gap: 3rem;
-      opacity: 0; animation: fadeUp 0.8s ease forwards 1s;
-    }
-    .stat { text-align: right; }
-    .stat-num { font-family: 'Bebas Neue', sans-serif; font-size: 2.5rem; color: var(--sky); line-height: 1; }
-    .stat-label { font-size: 0.62rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); margin-top: 0.2rem; }
-
-    /* TICKER */
-    .ticker { background: var(--sky); padding: 0.6rem 0; overflow: hidden; white-space: nowrap; }
-    .ticker-inner { display: inline-block; animation: ticker 25s linear infinite; }
-    .ticker span { font-size: 0.65rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--black); font-weight: 400; padding: 0 3rem; }
-    .ticker span::before { content: '◆'; margin-right: 3rem; }
-
-    /* LIVE GAME BANNER */
-    .game-banner {
-      background: var(--card);
-      border-bottom: 1px solid var(--sky-border);
-      padding: 1rem 3rem;
+    .btn-apple {
+      background: #fff;
+      color: #000;
+      border: 1px solid #000;
+      border-radius: 6px;
+      width: 100%;
+      max-width: 320px;
+      height: 44px;
+      font-family: -apple-system, sans-serif;
+      font-size: 16px;
+      font-weight: 500;
+      cursor: pointer;
       display: flex;
       align-items: center;
-      justify-content: space-between;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 12px;
     }
-    .game-info { display: flex; align-items: center; gap: 1.5rem; }
-    .game-live { display: flex; align-items: center; gap: 0.5rem; font-size: 0.62rem; letter-spacing: 0.2em; text-transform: uppercase; color: #ff4444; }
-    .game-live::before { content: ''; width: 6px; height: 6px; background: #ff4444; border-radius: 50%; animation: pulse 1.5s ease-in-out infinite; }
-    .game-title { font-family: 'Cormorant Garamond', serif; font-size: 1.1rem; color: var(--text); }
-    .game-collection { font-size: 0.62rem; letter-spacing: 0.12em; color: var(--sky); text-transform: uppercase; }
-    .game-progress { display: flex; align-items: center; gap: 1.5rem; }
-    .game-minted { font-size: 0.65rem; color: var(--muted); letter-spacing: 0.1em; }
-    .game-minted span { color: var(--sky); }
-    .mint-btn {
-      background: var(--sky); color: var(--black);
-      padding: 0.5rem 1.2rem;
-      font-family: 'DM Mono', monospace; font-size: 0.65rem;
-      letter-spacing: 0.12em; text-transform: uppercase;
-      border: none; border-radius: 2px; cursor: pointer;
-      transition: background 0.2s;
+    .btn-google {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--faint);
+      border-radius: 6px;
+      width: 100%;
+      max-width: 320px;
+      height: 44px;
+      font-family: 'DM Mono', monospace;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 12px;
     }
-    .mint-btn:hover { background: var(--sky-light); }
-
-    /* SECTION */
-    .section { padding: 6rem 3rem; }
-
-    .section-header {
-      display: flex; align-items: flex-end; justify-content: space-between;
-      margin-bottom: 3rem;
-      border-bottom: 1px solid var(--faint);
-      padding-bottom: 1.5rem;
+    .signin-skip {
+      color: var(--muted);
+      font-size: 10px;
+      letter-spacing: 1px;
+      cursor: pointer;
+      margin-top: 8px;
+      background: none;
+      border: none;
+      font-family: 'DM Mono', monospace;
     }
-    .section-label { font-size: 0.62rem; letter-spacing: 0.25em; text-transform: uppercase; color: var(--sky); margin-bottom: 0.5rem; }
-    .section-title { font-family: 'Cormorant Garamond', serif; font-size: 2.8rem; font-weight: 300; color: var(--text); line-height: 1.1; }
-    .section-link { font-size: 0.65rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--sky); text-decoration: none; display: flex; align-items: center; gap: 0.5rem; transition: gap 0.2s; }
-    .section-link:hover { gap: 0.8rem; }
 
-    /* NFT GRID */
-    .collection-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--faint); border: 1px solid var(--faint); }
-
-    .nft-card { background: var(--card); aspect-ratio: 1; position: relative; overflow: hidden; cursor: pointer; transition: transform 0.3s; }
-    .nft-card:hover { transform: scale(1.01); z-index: 1; }
-
-    .nft-media { width: 100%; height: 100%; object-fit: cover; }
-
-    .nft-placeholder {
-      width: 100%; height: 100%;
-      display: flex; align-items: center; justify-content: center;
-      background: linear-gradient(135deg, #111620 0%, #0d1420 50%, #111825 100%);
-      position: relative;
+    /* ─── ONBOARDING ─── */
+    #onboarding-overlay {
+      position: fixed;
+      inset: 0;
+      background: var(--black);
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
     }
-    .nft-placeholder::after {
-      content: ''; position: absolute; inset: 0;
-      background: radial-gradient(circle at 50% 50%, rgba(107,173,232,0.08) 0%, transparent 60%);
+    #onboarding-overlay.hidden { display: none; }
+    .username-input {
+      background: var(--card);
+      border: 1px solid var(--faint);
+      border-radius: 4px;
+      color: var(--text);
+      font-family: 'DM Mono', monospace;
+      font-size: 18px;
+      padding: 14px 16px;
+      width: 100%;
+      max-width: 320px;
+      outline: none;
+      margin-bottom: 12px;
+      text-align: center;
+      letter-spacing: 2px;
     }
-    .nft-num { font-family: 'Bebas Neue', sans-serif; font-size: 5rem; color: rgba(107, 173, 232, 0.12); letter-spacing: 0.05em; }
-
-    .nft-card-info {
-      position: absolute; bottom: 0; left: 0; right: 0;
-      padding: 1.2rem;
-      background: linear-gradient(transparent, rgba(8,10,14,0.95));
-      transform: translateY(30%); transition: transform 0.3s;
+    .username-input:focus { border-color: var(--sky); }
+    .btn-continue {
+      background: var(--sky);
+      color: var(--black);
+      border: none;
+      border-radius: 4px;
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      padding: 14px;
+      width: 100%;
+      max-width: 320px;
+      cursor: pointer;
     }
-    .nft-card:hover .nft-card-info { transform: translateY(0); }
-    .nft-card-number { font-size: 0.6rem; letter-spacing: 0.2em; color: var(--sky); text-transform: uppercase; margin-bottom: 0.3rem; }
-    .nft-card-name { font-family: 'Cormorant Garamond', serif; font-size: 1.1rem; font-weight: 400; color: var(--text); margin-bottom: 0.8rem; }
-    .nft-card-price { font-size: 0.68rem; color: var(--muted); display: flex; justify-content: space-between; align-items: center; }
-    .nft-card-price span:last-child { color: var(--sky); font-weight: 400; }
-
-    /* LOADING STATE */
-    .loading-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--faint); border: 1px solid var(--faint); }
-    .loading-card { background: var(--card); aspect-ratio: 1; display: flex; align-items: center; justify-content: center; }
-    .loading-pulse { width: 40px; height: 40px; border-radius: 50%; background: var(--faint); animation: loadpulse 1.5s ease-in-out infinite; }
-
-    .status-msg { text-align: center; padding: 3rem; font-size: 0.75rem; color: var(--muted); letter-spacing: 0.1em; }
-
-    /* COUNTER */
-    .counter-section {
-      padding: 4rem 3rem; background: var(--card);
-      border-top: 1px solid var(--faint); border-bottom: 1px solid var(--faint);
+    .username-hint {
+      color: var(--muted);
+      font-size: 10px;
+      letter-spacing: 1px;
+      margin-bottom: 16px;
+      text-align: center;
     }
-    .counter-inner { display: flex; align-items: center; justify-content: space-between; max-width: 900px; margin: 0 auto; }
-    .counter-text .label { font-size: 0.62rem; letter-spacing: 0.25em; text-transform: uppercase; color: var(--sky); margin-bottom: 0.5rem; }
-    .counter-text .title { font-family: 'Cormorant Garamond', serif; font-size: 1.8rem; font-weight: 300; color: var(--text); }
-    .counter-display { display: flex; gap: 1.5rem; align-items: center; }
-    .time-unit { text-align: center; }
-    .time-num { font-family: 'Bebas Neue', sans-serif; font-size: 3.5rem; color: var(--text); line-height: 1; display: block; }
-    .time-label { font-size: 0.58rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); margin-top: 0.3rem; }
-    .time-sep { font-family: 'Bebas Neue', sans-serif; font-size: 3rem; color: var(--faint); padding-bottom: 0.5rem; }
-    .counter-progress { width: 200px; }
-    .progress-label { display: flex; justify-content: space-between; font-size: 0.62rem; color: var(--muted); margin-bottom: 0.5rem; letter-spacing: 0.1em; }
-    .progress-label span:last-child { color: var(--sky); }
-    .progress-bar { height: 3px; background: var(--faint); border-radius: 2px; overflow: hidden; }
-    .progress-fill { height: 100%; background: var(--sky); border-radius: 2px; transition: width 1s ease; }
 
-    /* HOW IT WORKS */
-    .how-section { padding: 6rem 3rem; background: var(--dark); }
-    .steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; margin-top: 3rem; position: relative; }
-    .steps::before { content: ''; position: absolute; top: 2rem; left: 12.5%; right: 12.5%; height: 1px; background: linear-gradient(90deg, transparent, var(--sky-border), var(--sky-border), transparent); }
-    .step { padding: 2rem; text-align: center; position: relative; }
-    .step-num { width: 4rem; height: 4rem; border: 1px solid var(--sky-border); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Bebas Neue', sans-serif; font-size: 1.8rem; color: var(--sky); margin: 0 auto 1.5rem; background: var(--dark); position: relative; z-index: 1; transition: background 0.3s, border-color 0.3s; }
-    .step:hover .step-num { background: var(--sky-dim); border-color: var(--sky); }
-    .step-title { font-family: 'Cormorant Garamond', serif; font-size: 1.3rem; font-weight: 400; color: var(--text); margin-bottom: 0.8rem; }
-    .step-desc { font-size: 0.72rem; line-height: 1.7; color: var(--muted); letter-spacing: 0.02em; }
+    /* ─── TAB BAR ─── */
+    #tab-bar {
+      flex-shrink: 0;
+      display: flex;
+      background: var(--black);
+      border-top: 1px solid var(--faint);
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+    .tab {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 10px 0;
+      cursor: pointer;
+      border: none;
+      background: none;
+      color: var(--sky);
+      font-family: 'DM Mono', monospace;
+      font-size: 9px;
+      letter-spacing: 1.5px;
+      gap: 4px;
+      text-decoration: none;
+    }
+    .tab.active { color: var(--text); }
+    .tab-icon { font-size: 18px; }
 
-    /* MARKETPLACE */
-    .marketplace-section { padding: 6rem 3rem; }
-    .listing-row { display: grid; grid-template-columns: auto 1fr auto auto auto; align-items: center; gap: 2rem; padding: 1.2rem 1.5rem; border: 1px solid var(--faint); background: var(--card); margin-bottom: 1px; transition: border-color 0.2s, background 0.2s; cursor: pointer; }
-    .listing-row:hover { border-color: var(--sky-border); background: var(--card2); }
-    .listing-thumb { width: 48px; height: 48px; background: linear-gradient(135deg, var(--card2), var(--faint)); border-radius: 2px; display: flex; align-items: center; justify-content: center; font-family: 'Bebas Neue', sans-serif; font-size: 1.1rem; color: rgba(107,173,232,0.3); overflow: hidden; }
-    .listing-thumb img { width: 100%; height: 100%; object-fit: cover; }
-    .listing-name { font-family: 'Cormorant Garamond', serif; font-size: 1.1rem; font-weight: 400; color: var(--text); }
-    .listing-collection { font-size: 0.62rem; letter-spacing: 0.12em; color: var(--muted); text-transform: uppercase; margin-top: 0.2rem; }
-    .listing-edition { font-size: 0.65rem; letter-spacing: 0.1em; color: var(--sky); text-align: right; }
-    .listing-price { font-family: 'Bebas Neue', sans-serif; font-size: 1.4rem; color: var(--text); text-align: right; letter-spacing: 0.05em; }
-    .listing-price-sub { font-size: 0.6rem; color: var(--muted); text-align: right; letter-spacing: 0.08em; }
-    .listing-btn { background: transparent; border: 1px solid var(--sky-border); color: var(--sky); padding: 0.45rem 1rem; font-family: 'DM Mono', monospace; font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase; cursor: pointer; border-radius: 2px; white-space: nowrap; transition: background 0.2s; }
-    .listing-btn:hover { background: var(--sky-dim); }
-
-    /* APP SECTION */
-    .app-section { padding: 6rem 3rem; background: var(--card); border-top: 1px solid var(--faint); display: grid; grid-template-columns: 1fr 1fr; gap: 6rem; align-items: center; }
-    .app-text .overline { font-size: 0.62rem; letter-spacing: 0.25em; text-transform: uppercase; color: var(--sky); margin-bottom: 1rem; }
-    .app-text h2 { font-family: 'Cormorant Garamond', serif; font-size: 3rem; font-weight: 300; line-height: 1.15; color: var(--text); margin-bottom: 1.5rem; }
-    .app-text p { font-size: 0.75rem; line-height: 1.8; color: var(--muted); margin-bottom: 2rem; letter-spacing: 0.02em; }
-    .app-badges { display: flex; gap: 1rem; }
-    .app-badge { display: flex; align-items: center; gap: 0.7rem; padding: 0.7rem 1.3rem; border: 1px solid var(--faint); border-radius: 4px; cursor: pointer; transition: border-color 0.2s; text-decoration: none; color: var(--text); }
-    .app-badge:hover { border-color: var(--sky-border); }
-    .app-badge-icon { font-size: 1.5rem; }
-    .app-badge-text .sub { font-size: 0.58rem; color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; }
-    .app-badge-text .main { font-family: 'Cormorant Garamond', serif; font-size: 1rem; font-weight: 400; }
-    .app-visual { display: flex; justify-content: center; gap: 1.5rem; align-items: flex-end; }
-    .phone-mock { width: 160px; height: 300px; background: var(--dark); border: 1px solid var(--faint); border-radius: 24px; overflow: hidden; position: relative; flex-shrink: 0; }
-    .phone-mock:first-child { transform: rotate(-3deg) translateY(20px); opacity: 0.7; }
-    .phone-mock:last-child { transform: rotate(3deg) translateY(20px); opacity: 0.7; }
-    .phone-screen { width: 100%; height: 100%; background: linear-gradient(160deg, #0d1420 0%, #111825 100%); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.5rem; padding: 1rem; }
-    .phone-logo { font-family: 'Cormorant Garamond', serif; font-size: 0.9rem; font-style: italic; color: var(--sky); letter-spacing: 0.05em; }
-    .phone-nft { width: 100%; aspect-ratio: 1; background: linear-gradient(135deg, var(--faint), var(--card2)); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-family: 'Bebas Neue', sans-serif; font-size: 2rem; color: rgba(107,173,232,0.2); }
-    .phone-mint { width: 100%; background: var(--sky); color: var(--black); text-align: center; font-size: 0.6rem; letter-spacing: 0.15em; text-transform: uppercase; padding: 0.5rem; border-radius: 4px; font-weight: 400; }
-
-    /* FOOTER */
-    footer { padding: 3rem; border-top: 1px solid var(--faint); display: flex; align-items: center; justify-content: space-between; }
-    .footer-logo { font-family: 'Cormorant Garamond', serif; font-size: 1.3rem; font-weight: 300; font-style: italic; color: var(--muted); }
-    .footer-logo span { color: var(--sky); }
-    .footer-links { display: flex; gap: 2rem; list-style: none; }
-    .footer-links a { font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); text-decoration: none; transition: color 0.2s; }
-    .footer-links a:hover { color: var(--sky); }
-    .footer-copy { font-size: 0.62rem; color: var(--faint); letter-spacing: 0.08em; }
-
-    /* ANIMATIONS */
-    @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-    @keyframes ticker { from { transform: translateX(0); } to { transform: translateX(-50%); } }
-    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
-    @keyframes loadpulse { 0%, 100% { opacity: 0.3; } 50% { opacity: 0.8; } }
-
-    ::-webkit-scrollbar { width: 4px; }
-    ::-webkit-scrollbar-track { background: var(--black); }
-    ::-webkit-scrollbar-thumb { background: var(--faint); border-radius: 2px; }
+    /* ─── EMPTY STATE ─── */
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 300px;
+      gap: 12px;
+      color: var(--muted);
+      font-size: 11px;
+      letter-spacing: 1px;
+      text-align: center;
+      padding: 2rem;
+    }
   </style>
 </head>
 <body>
 
-  <!-- NAV -->
-  <nav>
-    <a href="#" class="nav-logo">October<span>-San</span>™</a>
-    <ul class="nav-links">
-      <li><a href="#collection">Today</a></li>
-      <li><a href="#marketplace">Marketplace</a></li>
-      <li><a href="#how">How It Works</a></li>
-      <li><a href="#app" class="nav-cta">Get the App</a></li>
-    </ul>
-  </nav>
+<!-- SIGN IN OVERLAY -->
+<div id="signin-overlay">
+  <div class="signin-icon-wrap">
+    <img src="/icon.png" alt="October-San" />
+  </div>
+  <div class="signin-logo">October-<span>San</span>™</div>
+  <button class="btn-apple" onclick="signIn('apple')">
+    <svg width="18" height="22" viewBox="0 0 18 22" fill="black" xmlns="http://www.w3.org/2000/svg">
+      <path d="M14.8 11.3c0-2.9 2.4-4.3 2.5-4.4-1.4-2-3.5-2.3-4.2-2.3-1.8-.2-3.5 1-4.4 1-.9 0-2.3-1-3.8-1-1.9 0-3.7 1.1-4.7 2.9-2 3.5-.5 8.6 1.4 11.5 1 1.4 2.1 2.9 3.6 2.8 1.4-.1 2-.9 3.7-.9 1.7 0 2.2.9 3.7.9 1.5 0 2.5-1.4 3.5-2.8.7-1 1.3-2.1 1.6-3.2-3.5-1.4-3.4-5.5-.9-5.5zM12.4 3.2c.8-1 1.3-2.3 1.2-3.7-1.2.1-2.6.8-3.4 1.8-.8.9-1.4 2.2-1.2 3.5 1.3.1 2.6-.6 3.4-1.6z"/>
+    </svg>
+    Sign in with Apple
+  </button>
+  <button class="btn-google" onclick="signIn('google')">
+    G &nbsp; Sign in with Google
+  </button>
+  <button class="signin-skip" onclick="browseWithoutSignIn()">BROWSE WITHOUT SIGNING IN →</button>
+</div>
 
-  <!-- HERO -->
-  <section class="hero">
-    <div class="hero-glow"></div>
-    <div class="hero-label">Live · On Polygon · In-Stadium NFT Experience</div>
-    <h1 class="hero-title">OCTOBER-<br><span class="accent">SAN</span></h1>
-    <p class="hero-subtitle">Mint an October-San moment.</p>
-    <p class="hero-subtitle-2">Every game a new collection. Every play a new collectible. Limited by design.</p>
-    <div class="hero-actions">
-      <a href="#collection" class="btn-primary">Today's Collection</a>
-      <a href="#app" class="btn-secondary">Download the App</a>
-    </div>
-    <div class="hero-stats">
-      <div class="stat"><div class="stat-num" id="hero-minted">—</div><div class="stat-label">Minted Today</div></div>
-      <div class="stat"><div class="stat-num">5%</div><div class="stat-label">Creator Royalty</div></div>
-      <div class="stat"><div class="stat-num">POL</div><div class="stat-label">Polygon Network</div></div>
-    </div>
-  </section>
+<!-- ONBOARDING OVERLAY -->
+<div id="onboarding-overlay" class="hidden">
+  <div class="signin-icon-wrap">
+    <img src="/icon.png" alt="October-San" />
+  </div>
+  <div class="signin-logo">October-<span>San</span>™</div>
+  <div class="username-hint">CHOOSE YOUR COLLECTOR NAME</div>
+  <div style="display:flex;align-items:center;gap:4px;margin-bottom:12px;">
+    <span style="color:var(--muted);font-size:1.2rem;">@</span>
+    <input type="text" class="username-input" id="username-input" placeholder="yourname" maxlength="20" autocapitalize="none" autocorrect="off" />
+  </div>
+  <div style="color:var(--muted);font-size:9px;letter-spacing:1px;margin-bottom:16px;">This is not your Apple ID — just your October-San username.</div>
+  <button class="btn-continue" onclick="completeOnboarding()">LET'S GO</button>
+</div>
 
-  <!-- TICKER -->
-  <div class="ticker">
-    <div class="ticker-inner">
-      <span>Every Game a New Collection</span>
-      <span>Every Play a New Collectible</span>
-      <span>Mint an October-San Moment</span>
-      <span>Limited Edition · In-Stadium</span>
-      <span>5% Creator Royalties</span>
-      <span>Powered by Polygon</span>
-      <span>Every Game a New Collection</span>
-      <span>Every Play a New Collectible</span>
-      <span>Mint an October-San Moment</span>
-      <span>Limited Edition · In-Stadium</span>
-      <span>5% Creator Royalties</span>
-      <span>Powered by Polygon</span>
+<!-- MAIN APP -->
+<div id="app">
+
+  <!-- HEADER -->
+  <div id="header">
+    <div class="header-top">
+      <a class="logo">October-<span>San</span>™</a>
+      <span class="header-username" id="header-username"></span>
     </div>
   </div>
 
-  <!-- COUNTER -->
-  <div class="counter-section">
-    <div class="counter-inner">
-      <div class="counter-text">
-        <div class="label" id="collection-date">Loading collection...</div>
-        <div class="title">Collection closes in</div>
-      </div>
-      <div class="counter-display">
-        <div class="time-unit"><span class="time-num" id="hours">--</span><div class="time-label">Hours</div></div>
-        <div class="time-sep">:</div>
-        <div class="time-unit"><span class="time-num" id="minutes">--</span><div class="time-label">Minutes</div></div>
-        <div class="time-sep">:</div>
-        <div class="time-unit"><span class="time-num" id="seconds">--</span><div class="time-label">Seconds</div></div>
-      </div>
-      <div class="counter-progress">
-        <div class="progress-label">
-          <span>Minted</span>
-          <span id="minted-count">— / 1,000</span>
-        </div>
-        <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
-      </div>
+  <!-- MINT HERO (sticky) -->
+  <div id="mint-hero">
+    <div class="mint-icon-wrap">
+      <img src="/icon.png" alt="October-San" />
+    </div>
+    <div class="hero-title">MINT AN</div>
+    <div class="hero-script">October-<span>San</span>™</div>
+    <div class="hero-sub">MOMENT.</div>
+    <button class="mint-btn" onclick="goMint()">TAP TO MINT YOUR MOMENT</button>
+  </div>
+
+  <!-- FEED -->
+  <div id="feed">
+    <div class="feed-loading" id="feed-loading">
+      <div class="spinner"></div>
+      <span>LOADING MOMENTS...</span>
+    </div>
+    <div id="feed-content"></div>
+    <div id="feed-empty" class="empty-state" style="display:none;">
+      <div>No moments yet.</div>
+      <div style="color:var(--muted);">Be the first to mint at the stadium.</div>
     </div>
   </div>
 
-  <!-- MARKETPLACE -->
-  <section class="marketplace-section" id="marketplace">
-    <div class="section-header">
-      <div>
-        <div class="section-label">Live on Polygon</div>
-        <h2 class="section-title">Marketplace</h2>
-      </div>
-      <a href="#" class="section-link">Browse all →</a>
-    </div>
-    <div id="marketplace-listings">
-      <div class="status-msg">Loading marketplace listings...</div>
-    </div>
-  </section>
+  <!-- TAB BAR -->
+  <div id="tab-bar">
+    <a class="tab active" href="/" id="tab-home">
+      <span class="tab-icon">◉</span>
+      <span>HOME</span>
+    </a>
+    <a class="tab" href="/daily" id="tab-daily">
+      <span class="tab-icon">⊞</span>
+      <span>DAILY</span>
+    </a>
+    <a class="tab" href="/my" id="tab-my">
+      <span class="tab-icon">◯</span>
+      <span>MY</span>
+    </a>
+    <a class="tab" href="/profile" id="tab-profile">
+      <span class="tab-icon">⊙</span>
+      <span>PROFILE</span>
+    </a>
+  </div>
 
-  <!-- TODAY'S COLLECTION -->
-  <section class="section" id="collection">
-    <div class="section-header">
-      <div>
-        <div class="section-label" id="collection-label">Loading...</div>
-        <h2 class="section-title">Today's Collection</h2>
-      </div>
-      <a href="#marketplace" class="section-link">View all in marketplace →</a>
-    </div>
-    <div id="nft-grid">
-      <div class="loading-grid">
-        <div class="loading-card"><div class="loading-pulse"></div></div>
-        <div class="loading-card"><div class="loading-pulse"></div></div>
-        <div class="loading-card"><div class="loading-pulse"></div></div>
-        <div class="loading-card"><div class="loading-pulse"></div></div>
-      </div>
-    </div>
-    <div id="nft-status"></div>
-  </section>
-  
-  <!-- HOW IT WORKS -->
-  <section class="how-section" id="how">
-    <div class="section-header" style="border-bottom-color: var(--faint);">
-      <div>
-        <div class="section-label">The In-Stadium Experience</div>
-        <h2 class="section-title">How It Works</h2>
-      </div>
-    </div>
-    <div class="steps">
-      <div class="step">
-        <div class="step-num">1</div>
-        <div class="step-title">Open the App</div>
-        <div class="step-desc">Download October-San. You're at the game. The collection is live.</div>
-      </div>
-      <div class="step">
-        <div class="step-num">2</div>
-        <div class="step-title">Capture the Moment</div>
-        <div class="step-desc">Take a photo or video of the play, the crowd, the moment. Anything.</div>
-      </div>
-      <div class="step">
-        <div class="step-num">3</div>
-        <div class="step-title">Mint Your NFT</div>
-        <div class="step-desc">Your NFT is numbered within this game's collection. Limited. Permanent.</div>
-      </div>
-      <div class="step">
-        <div class="step-num">4</div>
-        <div class="step-title">Collect & Trade</div>
-        <div class="step-desc">List it. Sell it. Trade with fans worldwide. 5% royalty forever.</div>
-      </div>
-    </div>
-  </section>
+</div>
 
-  <!-- APP SECTION -->
-  <section class="app-section" id="app">
-    <div class="app-text">
-      <div class="overline">Coming Soon · iOS & Android</div>
-      <h2>Mint your moment from the stands.</h2>
-      <p>You're at the game. The collection is live. Open October-San, capture the play, and mint. Your NFT is numbered within this game's collection — a timestamp on the blockchain, yours forever.</p>
-      <div class="app-badges">
-        <a href="#" class="app-badge">
-          <div class="app-badge-icon">🍎</div>
-          <div class="app-badge-text"><div class="sub">Download on the</div><div class="main">App Store</div></div>
-        </a>
-        <a href="#" class="app-badge">
-          <div class="app-badge-icon">▶</div>
-          <div class="app-badge-text"><div class="sub">Get it on</div><div class="main">Google Play</div></div>
-        </a>
-      </div>
-    </div>
-    <div class="app-visual">
-      <div class="phone-mock">
-        <div class="phone-screen">
-          <div class="phone-logo">October-San™</div>
-          <div class="phone-nft">NFT</div>
-          <div style="font-size:0.55rem; color: var(--muted); letter-spacing:0.1em; text-align:center;">#47 of 1,000</div>
-          <div class="phone-mint">Mint Now</div>
-        </div>
-      </div>
-      <div class="phone-mock" style="width:180px; height:340px; transform:none; opacity:1; border-color: var(--sky-border);">
-        <div class="phone-screen">
-          <div class="phone-logo">October-San™</div>
-          <div class="phone-nft" style="font-size:2.5rem;">◉</div>
-          <div style="font-size:0.55rem; color: var(--sky); letter-spacing:0.1em; text-align:center; margin-top:-0.3rem;">CAPTURE MOMENT</div>
-          <div style="font-size:0.52rem; color: var(--muted); letter-spacing:0.08em; text-align:center; line-height:1.6;">Game Collection Live<br><span id="phone-minted">— minted</span></div>
-          <div class="phone-mint">Take Photo & Mint</div>
-        </div>
-      </div>
-      <div class="phone-mock">
-        <div class="phone-screen">
-          <div class="phone-logo">October-San™</div>
-          <div class="phone-nft">MKT</div>
-          <div style="font-size:0.55rem; color: var(--muted); letter-spacing:0.1em; text-align:center;">MARKETPLACE</div>
-          <div class="phone-mint" style="background: transparent; border: 1px solid var(--sky-border); color: var(--sky);">Browse</div>
-        </div>
-      </div>
-    </div>
-  </section>
+<script type="module">
+  import { createThirdwebClient } from 'https://esm.sh/thirdweb@5.120.1';
+  import { inAppWallet } from 'https://esm.sh/thirdweb@5.120.1/wallets';
+  import { polygon } from 'https://esm.sh/thirdweb@5.120.1/chains';
+  import { ethers } from 'https://esm.sh/ethers@5.7.2';
 
-  <!-- FOOTER -->
-  <footer>
-    <div class="footer-logo">October<span>-San</span>™</div>
-    <ul class="footer-links">
-      <li><a href="/terms">Terms</a></li>
-      <li><a href="/privacy">Privacy</a></li>
-      <li><a href="mailto:info@october-san.com">Contact</a></li>
-      <li><a href="https://polygonscan.com/address/0x397160Ad067BaaBa7f35Dd0b7A5C25F836b2539F" target="_blank">Polygon</a></li>
-    </ul>
+  // ─── CONFIG ───────────────────────────────────────────────
+  const CLIENT_ID = 'fb1460b2756706cc08a4f650e68fd526';
+  const CONTRACT_ADDRESS = '0x397160Ad067BaaBa7f35Dd0b7A5C25F836b2539F';
+  const MARKETPLACE_ADDRESS = '0xef77CDF9Dc521563270B6aBba379dbc3d389C08c';
+  const FIREBASE_URL = 'https://firestore.googleapis.com/v1/projects/october-san-e3a33/databases/(default)/documents';
+  const FIREBASE_API_KEY = 'AIzaSyBk5lN7XqYNzW9nCi8QNzF_placeholder';
 
-    <div class="footer-copy">© 2026 October-San LLC · All rights reserved</div>
-  </footer>
+  const client = createThirdwebClient({ clientId: CLIENT_ID });
 
-  <script>
-    // ─── CONFIG ───────────────────────────────────────────────
-    const CLIENT_ID = 'fb1460b2756706cc08a4f650e68fd526';
-    const CONTRACT_ADDRESS = '0x397160Ad067BaaBa7f35Dd0b7A5C25F836b2539F';
-    const MARKETPLACE_ADDRESS = '0xef77CDF9Dc521563270B6aBba379dbc3d389C08c';
-    const CHAIN_ID = 137; // Polygon Mainnet
-    const DAILY_CAP = 1000;
+  let currentUser = null;
+  let connectedWallet = null;
+  let connectedAccount = null;
 
-    // ─── COUNTDOWN ────────────────────────────────────────────
-    function updateCountdown() {
-      const now = new Date();
-      const midnight = new Date();
-      midnight.setHours(24, 0, 0, 0);
-      const diff = midnight - now;
-      const h = Math.floor(diff / 3600000);
-      const m = Math.floor((diff % 3600000) / 60000);
-      const s = Math.floor((diff % 60000) / 1000);
-      document.getElementById('hours').textContent = String(h).padStart(2, '0');
-      document.getElementById('minutes').textContent = String(m).padStart(2, '0');
-      document.getElementById('seconds').textContent = String(s).padStart(2, '0');
+  // ─── FIREBASE HELPERS ─────────────────────────────────────
+  function parseField(f) {
+    if (!f) return null;
+    if (f.stringValue !== undefined) return f.stringValue;
+    if (f.booleanValue !== undefined) return f.booleanValue;
+    if (f.integerValue !== undefined) return parseInt(f.integerValue);
+    return null;
+  }
+
+  async function firebaseGet(path) {
+    const res = await fetch(`${FIREBASE_URL}/${path}?key=${FIREBASE_API_KEY}`);
+    return res.json();
+  }
+
+  async function firebaseSet(path, fields) {
+    const res = await fetch(`${FIREBASE_URL}/${path}?key=${FIREBASE_API_KEY}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ fields })
+    });
+    return res.json();
+  }
+
+  // ─── AUTH ─────────────────────────────────────────────────
+  async function checkExistingSession() {
+    const stored = localStorage.getItem('octsn_user');
+    if (stored) {
+      currentUser = JSON.parse(stored);
+      document.getElementById('header-username').textContent = '@' + currentUser.username;
+      document.getElementById('signin-overlay').classList.add('hidden');
+      // Reconnect wallet silently
+      try {
+        const wallet = inAppWallet();
+        const account = await wallet.connect({
+          client,
+          strategy: currentUser.provider === 'google' ? 'google' : 'apple',
+          chain: polygon,
+        });
+        connectedAccount = account;
+        connectedWallet = wallet;
+      } catch(e) {
+        console.log('Auto wallet connect:', e.message);
+      }
     }
-    updateCountdown();
-    setInterval(updateCountdown, 1000);
+    loadFeed();
+  }
 
-    // ─── DATE DISPLAY ─────────────────────────────────────────
-    const today = new Date();
-    const dateStr = today.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
-    document.getElementById('collection-date').textContent = dateStr + ' Collection';
-    document.getElementById('collection-label').textContent = dateStr;
-
-    // ─── DISPLAY NFTs ────────────────────────────────────────
-    function loadNFTs() {
-      showGenesisNFT();
-    }
-
-    function showGenesisNFT() {
-      const grid = document.getElementById('nft-grid');
-      grid.innerHTML = `<div class="collection-grid">
-        <div class="nft-card">
-          <div class="nft-placeholder" style="background: linear-gradient(135deg, #0a1628, #1a3a5c); position:relative; overflow:hidden;">
-            <div style="position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:0.5rem; padding:1rem;">
-              <div style="font-family: 'Bebas Neue', sans-serif; font-size: 3rem; color: rgba(107,173,232,0.15); letter-spacing:0.1em;">001</div>
-              <div style="font-size: 0.55rem; letter-spacing:0.2em; text-transform:uppercase; color:var(--sky);">GENESIS · DODGER STADIUM</div>
-              <div style="font-size: 0.5rem; letter-spacing:0.15em; color:var(--muted); text-align:center;">IT'S TIME FOR<br>DODGERS BASEBALL</div>
-            </div>
-          </div>
-          <div class="nft-card-info">
-            <div class="nft-card-number">#0 · October-San Genesis</div>
-            <div class="nft-card-name">October-San Genesis</div>
-            <div class="nft-card-price"><span>Founder Edition</span><span>Owned ✓</span></div>
-          </div>
-        </div>
-        <div class="nft-card">
-          <div class="nft-placeholder"><div class="nft-num" style="font-size:3rem; opacity:0.08;">—</div></div>
-          <div class="nft-card-info">
-            <div class="nft-card-number">Collection Open · May 25, 2026</div>
-            <div class="nft-card-name">Your Moment Here</div>
-            <div class="nft-card-price"><span>Mint via app</span><span>↓</span></div>
-          </div>
-        </div>
-        <div class="nft-card">
-          <div class="nft-placeholder"><div class="nft-num" style="font-size:3rem; opacity:0.08;">—</div></div>
-          <div class="nft-card-info">
-            <div class="nft-card-number">Every Game · Every Play</div>
-            <div class="nft-card-name">Every Moment a Collectible</div>
-            <div class="nft-card-price"><span>On Polygon</span><span>◆</span></div>
-          </div>
-        </div>
-        <div class="nft-card">
-          <div class="nft-placeholder"><div class="nft-num" style="font-size:3rem; opacity:0.08;">—</div></div>
-          <div class="nft-card-info">
-            <div class="nft-card-number">App Coming Soon</div>
-            <div class="nft-card-name">Mint an October-San Moment</div>
-            <div class="nft-card-price"><span>iOS & Android</span><span>↓</span></div>
-          </div>
-        </div>
-      </div>`;
-
-      document.getElementById('marketplace-listings').innerHTML = `
-        <div class="listing-row">
-          <div class="listing-thumb" style="background: linear-gradient(135deg, #0a1628, #1a3a5c); color: var(--sky); font-size: 0.65rem; letter-spacing:0.05em; text-align:center; line-height:1.2; padding:0.3rem;">OCT<br>GEN</div>
-          <div>
-            <div class="listing-name">October-San Genesis</div>
-            <div class="listing-collection">Founder's Edition · Dodger Stadium · May 24, 2026</div>
-          </div>
-          <div class="listing-edition">#0 · Supply: 2</div>
-          <div>
-            <div class="listing-price">— POL</div>
-            <div class="listing-price-sub">Founder hold</div>
-          </div>
-          <button class="listing-btn" onclick="window.open('https://polygonscan.com/address/0x36aF73AbABEf8d9DEFfDc29509aeACc3a3c4b164', '_blank')">On-Chain ↗</button>
-        </div>
-        <div class="listing-row" style="opacity:0.4;">
-          <div class="listing-thumb">—</div>
-          <div>
-            <div class="listing-name">Your NFT Could Be Here</div>
-            <div class="listing-collection">Mint via the October-San app</div>
-          </div>
-          <div class="listing-edition">— of 1,000</div>
-          <div><div class="listing-price">—</div><div class="listing-price-sub">—</div></div>
-          <button class="listing-btn" style="opacity:0.5;">Soon</button>
-        </div>`;
-
-      updateStats(2);
-    }
-
-
-     // Stub for missing function
-    function updateStats(n) {}
-    
-    // Load NFTs on page load
-    loadNFTs();
-
-  // ─── LOAD TODAY'S COLLECTION ──────────────────────────────
-  async function loadCollection() {
+  window.signIn = async function(strategy) {
     try {
+      const wallet = inAppWallet();
+      const account = await wallet.connect({ client, strategy, chain: polygon });
+      connectedAccount = account;
+      connectedWallet = wallet;
+
+      // Check for existing profile
+      const userId = account.address;
+      try {
+        const data = await firebaseGet(`users/${userId}`);
+        if (data.fields?.username) {
+          const username = parseField(data.fields.username);
+          currentUser = { userId, username, provider: strategy, walletAddress: account.address };
+          localStorage.setItem('octsn_user', JSON.stringify(currentUser));
+          document.getElementById('header-username').textContent = '@' + username;
+          document.getElementById('signin-overlay').classList.add('hidden');
+          loadFeed();
+          return;
+        }
+      } catch(e) {}
+
+      // New user — show onboarding
+      currentUser = { userId, provider: strategy, walletAddress: account.address };
+      document.getElementById('signin-overlay').classList.add('hidden');
+      document.getElementById('onboarding-overlay').classList.remove('hidden');
+
+    } catch(e) {
+      console.error('Sign in error:', e.message);
+    }
+  };
+
+  window.browseWithoutSignIn = function() {
+    document.getElementById('signin-overlay').classList.add('hidden');
+    loadFeed();
+  };
+
+  window.completeOnboarding = async function() {
+    const username = document.getElementById('username-input').value.trim();
+    if (!username || username.length < 3) {
+      alert('Username must be at least 3 characters.');
+      return;
+    }
+    if (!/^[a-zA-Z0-9_]+$/.test(username)) {
+      alert('Only letters, numbers and underscores allowed.');
+      return;
+    }
+
+    // Check availability
+    try {
+      const check = await firebaseGet(`usernames/${username}`);
+      if (check.fields) {
+        alert('@' + username + ' is taken. Please choose another.');
+        return;
+      }
+    } catch(e) {}
+
+    // Save profile
+    const userId = currentUser.userId;
+    await firebaseSet(`users/${userId}`, {
+      username: { stringValue: username },
+      provider: { stringValue: currentUser.provider },
+      walletAddress: { stringValue: currentUser.walletAddress },
+      joinDate: { stringValue: new Date().toISOString() },
+    });
+    await firebaseSet(`usernames/${username}`, {
+      userId: { stringValue: userId }
+    });
+
+    currentUser = { ...currentUser, username };
+    localStorage.setItem('octsn_user', JSON.stringify(currentUser));
+    document.getElementById('header-username').textContent = '@' + username;
+    document.getElementById('onboarding-overlay').classList.add('hidden');
+    loadFeed();
+  };
+
+  // ─── LOAD FEED ────────────────────────────────────────────
+  async function loadFeed() {
+    try {
+      // Fetch all NFTs from contract
       const res = await fetch(
-        `https://137.insight.thirdweb.com/v1/nfts/${CONTRACT_ADDRESS}?limit=50`,
+        `https://137.insight.thirdweb.com/v1/nfts/${CONTRACT_ADDRESS}?limit=100`,
         { headers: { 'x-client-id': CLIENT_ID } }
       );
       const data = await res.json();
-      const nfts = (data.data || []).slice(-8).reverse();
+      const nfts = (data.data || []).reverse(); // newest first
 
-      if (nfts.length === 0) {
-        document.getElementById('nft-grid').innerHTML = 
-          '<div style="color:#6B7A99;text-align:center;padding:2rem;">No moments minted yet. Be first at the stadium!</div>';
-        return;
-      }
-
-      document.getElementById('collection-label').textContent = `${nfts.length} MOMENTS MINTED`;
-      
-      document.getElementById('nft-grid').innerHTML = `
-        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:1rem;">
-          ${nfts.map(nft => {
-            const imageUrl = nft.image_url 
-              ? nft.image_url.startsWith('ipfs://')
-                ? `https://${CLIENT_ID}.ipfscdn.io/ipfs/${nft.image_url.slice(7)}`
-                : nft.image_url
-              : null;
-            return `
-              <a href="/buy/${nft.token_id}" style="text-decoration:none;">
-                <div style="background:#111620;border:1px solid #2A3347;border-radius:8px;overflow:hidden;position:relative;">
-                  ${imageUrl 
-                    ? `<img src="${imageUrl}" style="width:100%;aspect-ratio:3/4;object-fit:cover;" />`
-                    : `<div style="width:100%;aspect-ratio:3/4;background:#0D1117;display:flex;align-items:center;justify-content:center;color:#6B7A99;">◆</div>`
-                  }
-                  <div style="position:absolute;top:8px;left:8px;background:rgba(0,0,0,0.7);color:#6BADE8;font-size:10px;font-weight:700;padding:3px 8px;border-radius:4px;font-family:'DM Mono',monospace;">
-                    #${nft.token_id}
-                  </div>
-                  <div style="padding:8px;">
-                    <div style="color:#E8EDF5;font-size:11px;font-family:'DM Mono',monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
-                      ${nft.name || `Moment #${nft.token_id}`}
-                    </div>
-                  </div>
-                </div>
-              </a>
-            `;
-          }).join('')}
-        </div>
-      `;
-    } catch(e) {
-      console.error('Collection load error:', e);
-      document.getElementById('nft-grid').innerHTML = 
-        '<div style="color:#6B7A99;text-align:center;padding:2rem;">Collection loading...</div>';
-    }
-  }
-
-  // ─── LOAD MARKETPLACE ─────────────────────────────────────
- async function loadMarketplace() {
-    try {
-      // Load ethers via CDN script tag approach
-      if (!window.ethers) {
-        await new Promise((resolve, reject) => {
-          const script = document.createElement('script');
-          script.src = 'https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js';
-          script.onload = resolve;
-          script.onerror = reject;
-          document.head.appendChild(script);
-        });
-      }
-      const ethers = window.ethers;
-      const provider = new ethers.providers.JsonRpcProvider(
-        `https://137.rpc.thirdweb.com/${CLIENT_ID}`
-      );
+      // Fetch marketplace listings
+      const provider = new ethers.providers.JsonRpcProvider(`https://137.rpc.thirdweb.com/${CLIENT_ID}`);
       const marketAbi = [
         'function getAllListings(uint256 _startId, uint256 _endId) external view returns (tuple(uint256 listingId, uint256 tokenId, uint256 quantity, uint256 pricePerToken, uint128 startTimestamp, uint128 endTimestamp, address listingCreator, address assetContract, address currency, uint8 tokenType, uint8 status, bool reserved)[] listings)',
         'function totalListings() external view returns (uint256)',
       ];
-      
       const marketplace = new ethers.Contract(MARKETPLACE_ADDRESS, marketAbi, provider);
-      const total = await marketplace.totalListings();
-      
-      if (total.eq(0)) {
-        document.getElementById('marketplace-listings').innerHTML = 
-          '<div style="color:#6B7A99;text-align:center;padding:2rem;">No listings yet. Mint and list your moment!</div>';
+      let activeListings = [];
+      try {
+        const total = await marketplace.totalListings();
+        if (!total.eq(0)) {
+          const listings = await marketplace.getAllListings(0, total.sub(1));
+          const now = Math.floor(Date.now() / 1000);
+          activeListings = listings.filter(l =>
+            parseInt(l.status) === 1 &&
+            l.assetContract.toLowerCase() === CONTRACT_ADDRESS.toLowerCase() &&
+            parseInt(l.endTimestamp) > now
+          );
+        }
+      } catch(e) { console.log('Listings error:', e.message); }
+
+      document.getElementById('feed-loading').style.display = 'none';
+
+      if (nfts.length === 0) {
+        document.getElementById('feed-empty').style.display = 'flex';
         return;
       }
-      
-      const listings = await marketplace.getAllListings(0, total.sub(1));
-      const now = Math.floor(Date.now() / 1000);
-      const active = listings.filter(l => 
-        parseInt(l.status) === 1 && 
-        l.assetContract.toLowerCase() === CONTRACT_ADDRESS.toLowerCase() &&
-        parseInt(l.endTimestamp) > now
-      ).slice(0, 10);
 
-      if (active.length === 0) {
-        document.getElementById('marketplace-listings').innerHTML = 
-          '<div style="color:#6B7A99;text-align:center;padding:2rem;">No active listings right now.</div>';
-        return;
-      }
+      // Fetch usernames for wallet addresses
+      const userCache = {};
 
-      const formatted = await Promise.all(active.map(async (l) => {
-        const tokenId = l.tokenId.toString();
-        const priceInPOL = ethers.utils.formatEther(l.pricePerToken);
-        const priceInUSD = (parseFloat(priceInPOL) * 0.07).toFixed(2);
+      const cards = await Promise.all(nfts.map(async (nft) => {
+        const tokenId = nft.token_id;
+        const imageUrl = nft.image_url?.startsWith('ipfs://')
+          ? `https://${CLIENT_ID}.ipfscdn.io/ipfs/${nft.image_url.slice(7)}`
+          : nft.image_url;
+        const isVideo = nft.name?.toLowerCase().includes('video') || imageUrl?.includes('.mp4');
+
+        // Find listing
+        const listing = activeListings.find(l => l.tokenId.toString() === tokenId);
+        const isListed = !!listing;
+        const priceInPOL = isListed ? ethers.utils.formatEther(listing.pricePerToken) : null;
+        const priceInUSD = priceInPOL ? (parseFloat(priceInPOL) * 0.07).toFixed(2) : null;
+        const listingId = isListed ? listing.listingId.toString() : null;
+        const seller = isListed ? listing.listingCreator : null;
+
+        // Get owner
+        let ownerAddress = '';
+        let ownerUsername = '—';
         try {
-          const nftRes = await fetch(
-            `https://137.insight.thirdweb.com/v1/nfts/${CONTRACT_ADDRESS}/${tokenId}`,
+          const ownerRes = await fetch(
+            `https://137.insight.thirdweb.com/v1/nfts/${CONTRACT_ADDRESS}/${tokenId}/owners`,
             { headers: { 'x-client-id': CLIENT_ID } }
           );
-          const nftData = await nftRes.json();
-          const nft = nftData.data?.[0];
-          const imageUrl = nft?.image_url
-            ? nft.image_url.startsWith('ipfs://')
-              ? `https://${CLIENT_ID}.ipfscdn.io/ipfs/${nft.image_url.slice(7)}`
-              : nft.image_url
-            : null;
-          return { tokenId, priceInPOL, priceInUSD, imageUrl, name: nft?.name };
-        } catch(e) {
-          return { tokenId, priceInPOL, priceInUSD, imageUrl: null, name: `Moment #${tokenId}` };
-        }
+          const ownerData = await ownerRes.json();
+          ownerAddress = ownerData.data?.[0]?.owner_address || '';
+          
+          if (ownerAddress && !userCache[ownerAddress]) {
+            try {
+              // Look up username by wallet address
+              const userRes = await fetch(
+                `${FIREBASE_URL}/users/${ownerAddress}?key=${FIREBASE_API_KEY}`
+              );
+              const userData = await userRes.json();
+              userCache[ownerAddress] = parseField(userData.fields?.username) || ownerAddress.substring(0,6) + '...' + ownerAddress.slice(-4);
+            } catch(e) {
+              userCache[ownerAddress] = ownerAddress.substring(0,6) + '...' + ownerAddress.slice(-4);
+            }
+          }
+          ownerUsername = userCache[ownerAddress] || ownerAddress.substring(0,6) + '...' + ownerAddress.slice(-4);
+        } catch(e) {}
+
+        const isOwner = currentUser?.walletAddress?.toLowerCase() === ownerAddress?.toLowerCase();
+
+        return { tokenId, imageUrl, isVideo, isListed, priceInPOL, priceInUSD, listingId, seller, ownerAddress, ownerUsername, isOwner, name: nft.name };
       }));
 
-      document.getElementById('marketplace-listings').innerHTML = `
-        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:1rem;">
-          ${formatted.map(item => `
-            <a href="/buy/${item.tokenId}" style="text-decoration:none;">
-              <div style="background:#111620;border:1px solid #2A3347;border-radius:8px;overflow:hidden;position:relative;">
-                ${item.imageUrl
-                  ? `<img src="${item.imageUrl}" style="width:100%;aspect-ratio:3/4;object-fit:cover;" />`
-                  : `<div style="width:100%;aspect-ratio:3/4;background:#0D1117;display:flex;align-items:center;justify-content:center;color:#6B7A99;">◆</div>`
-                }
-                <div style="position:absolute;top:8px;left:8px;background:rgba(0,0,0,0.7);color:#6BADE8;font-size:10px;font-weight:700;padding:3px 8px;border-radius:4px;font-family:'DM Mono',monospace;">
-                  #${item.tokenId}
-                </div>
-                <div style="position:absolute;bottom:8px;right:8px;background:rgba(0,0,0,0.7);color:#E8EDF5;font-size:11px;font-weight:700;padding:3px 8px;border-radius:4px;font-family:'DM Mono',monospace;">
-                  $${item.priceInUSD}
-                </div>
-                <div style="padding:8px;">
-                  <div style="color:#E8EDF5;font-size:11px;font-family:'DM Mono',monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
-                    ${item.name || `Moment #${item.tokenId}`}
-                  </div>
-                  <div style="color:#6BADE8;font-size:10px;font-family:'DM Mono',monospace;margin-top:2px;">
-                    ${parseFloat(item.priceInPOL).toFixed(2)} POL
-                  </div>
-                </div>
-              </div>
-            </a>
-          `).join('')}
-        </div>
-      `;
+      renderFeed(cards);
+
     } catch(e) {
-      console.error('Marketplace load error:', e);
-      document.getElementById('marketplace-listings').innerHTML = 
-        '<div style="color:#6B7A99;text-align:center;padding:2rem;">Marketplace loading...</div>';
+      console.error('Feed error:', e);
+      document.getElementById('feed-loading').style.display = 'none';
     }
   }
 
+  function renderFeed(cards) {
+    const container = document.getElementById('feed-content');
+    container.innerHTML = cards.map(card => `
+      <div class="nft-card" data-token="${card.tokenId}">
+        ${card.isVideo
+          ? `<video class="nft-card-media" src="${card.imageUrl}" autoplay muted loop playsinline></video>`
+          : `<img class="nft-card-media" src="${card.imageUrl}" alt="Moment #${card.tokenId}" loading="lazy" />`
+        }
+        ${card.isListed ? '<div class="listed-border"></div>' : ''}
+        <div class="nft-card-token">#${card.tokenId}</div>
+        <div class="nft-card-overlay">
+          <div class="nft-card-user" onclick="viewProfile('${card.ownerAddress}', '${card.ownerUsername}')">
+            <div class="user-avatar">${card.ownerUsername.charAt(0).toUpperCase()}</div>
+            <div class="user-info">
+              <div class="user-name">@${card.ownerUsername}</div>
+              <div class="nft-name">${card.name || 'October-San Moment #' + card.tokenId}</div>
+            </div>
+          </div>
+          <div class="nft-card-actions">
+            ${card.isListed && !card.isOwner && currentUser
+              ? `<button class="btn-buy" onclick="buyMoment('${card.tokenId}')">BUY · $${card.priceInUSD}</button>`
+              : ''
+            }
+            ${card.isListed && card.isOwner
+              ? `<a class="btn-list" href="/buy/${card.tokenId}">MANAGE LISTING</a>`
+              : ''
+            }
+            ${!card.isListed && card.isOwner
+              ? `<a class="btn-list" href="/list/${card.tokenId}">LIST FOR SALE</a>`
+              : ''
+            }
+            ${card.isListed && !currentUser
+              ? `<button class="btn-buy" onclick="buyMoment('${card.tokenId}')">BUY · $${card.priceInUSD}</button>`
+              : ''
+            }
+          </div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // ─── ACTIONS ──────────────────────────────────────────────
+  window.goMint = function() {
+    if (!currentUser) {
+      document.getElementById('signin-overlay').classList.remove('hidden');
+      return;
+    }
+    window.location.href = '/mint';
+  };
+
+  window.buyMoment = function(tokenId) {
+    window.location.href = '/buy/' + tokenId;
+  };
+
+  window.viewProfile = function(address, username) {
+    window.location.href = '/profile?address=' + address;
+  };
+
+  // ─── SERVICE WORKER ───────────────────────────────────────
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js').catch(console.error);
+  }
+
   // ─── INIT ─────────────────────────────────────────────────
-  loadCollection();
-  loadMarketplace();
+  checkExistingSession();
 </script>
+
 </body>
 </html>
