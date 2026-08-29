@@ -641,6 +641,9 @@
         }
       } catch(e) {
         console.log('Auth token parse:', e.message);
+        console.log('Auth token:', authToken?.substring(0, 50));
+        console.log('Payload sub:', payload?.sub);
+        console.log('Payload:', JSON.stringify(payload).substring(0, 200));
       }
 
       // Check for existing profile
