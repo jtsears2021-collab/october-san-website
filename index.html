@@ -622,32 +622,24 @@
         console.log('getUser error:', e.message);
       }
 
-      // Get auth token to extract userId (same as native app)
-      let userId = account.address;
+      // Look up username via wallet address
       try {
-        const authToken = await wallet.getAuthToken();
-        if (authToken) {
-          const payload = JSON.parse(atob(authToken.split('.')[1]));
-          if (payload.sub) userId = payload.sub;
-        }
-      } catch(e) {
-        console.log('Auth token parse:', e.message);
-        console.log('Auth token:', authToken?.substring(0, 50));
-        console.log('Payload sub:', payload?.sub);
-        console.log('Payload:', JSON.stringify(payload).substring(0, 200));
-      }
-
-      // Check for existing profile
-      try {
-        const data = await firebaseGet(`users/${userId}`);
+        const data = await firebaseGet(`walletLookup/${account.address}`);
         if (data.fields?.username) {
           const username = parseField(data.fields.username);
-          currentUser = { userId, username, provider: strategy, walletAddress: account.address };
+          currentUser = { userId: account.address, username, provider: strategy, walletAddress: account.address };
           localStorage.setItem('octsn_user', JSON.stringify(currentUser));
           document.getElementById('header-username').textContent = '@' + username;
           document.getElementById('signin-overlay').classList.add('hidden');
           loadFeed();
           return;
+        }
+      } catch(e) {}
+
+      // New user — show onboarding
+      currentUser = { userId: account.address, provider: strategy, walletAddress: account.address };
+      document.getElementById('signin-overlay').classList.add('hidden');
+      document.getElementById('onboarding-overlay').classList.remove('hidden');
         }
       } catch(e) {}
 
@@ -696,6 +688,9 @@
     });
     await firebaseSet(`usernames/${username}`, {
       userId: { stringValue: userId }
+    });
+    await firebaseSet(`walletLookup/${currentUser.walletAddress}`, {
+      username: { stringValue: username }
     });
 
     currentUser = { ...currentUser, username };
