@@ -716,6 +716,8 @@
           );
           const ownerData = await ownerRes.json();
           ownerAddress = ownerData.data?.[0]?.owner_addresses?.[0] || '';
+      const nfts = (data.data || []).reverse();
+      console.log('First NFT:', JSON.stringify(nfts[0]).substring(0, 300));
       // Fetch marketplace listings
       const provider = new ethers.providers.JsonRpcProvider(`https://137.rpc.thirdweb.com/${CLIENT_ID}`);
       const marketAbi = [
