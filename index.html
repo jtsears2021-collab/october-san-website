@@ -133,8 +133,7 @@
 
     .nft-card {
       scroll-snap-align: start;
-      height: 100%;
-      min-height: 100%;
+      height: calc(100dvh - 120px);
       position: relative;
       background: var(--black);
       border-bottom: 1px solid var(--faint);
@@ -753,7 +752,7 @@
         const imageUrl = nft.image_url?.startsWith('ipfs://')
           ? `https://${CLIENT_ID}.ipfscdn.io/ipfs/${nft.image_url.slice(7)}`
           : nft.image_url;
-        const isVideo = nft.name?.toLowerCase().includes('video') || imageUrl?.includes('.mp4');
+        const isVideo = nft.name?.toLowerCase().includes('video');
 
         // Find listing
         const listing = activeListings.find(l => l.tokenId.toString() === tokenId);
