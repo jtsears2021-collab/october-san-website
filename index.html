@@ -710,12 +710,11 @@
   async function loadFeed() {
     try {
       // Fetch all NFTs from contract
-      const ownerRes = await fetch(
-            `https://polygon.insight.thirdweb.com/v1/nfts?contract_address=${CONTRACT_ADDRESS}&token_id=${tokenId}&chain=137`,
-            { headers: { 'x-client-id': CLIENT_ID } }
-          );
-          const ownerData = await ownerRes.json();
-          ownerAddress = ownerData.data?.[0]?.owner_addresses?.[0] || '';
+      const res = await fetch(
+        `https://137.insight.thirdweb.com/v1/nfts/${CONTRACT_ADDRESS}?limit=100`,
+        { headers: { 'x-client-id': CLIENT_ID } }
+      );
+      const data = await res.json();
       const nfts = (data.data || []).reverse();
       console.log('First NFT:', JSON.stringify(nfts[0]).substring(0, 300));
       // Fetch marketplace listings
