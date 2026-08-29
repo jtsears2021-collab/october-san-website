@@ -769,15 +769,7 @@
         let ownerUsername = '—';
         ownerAddress = nft.owner_addresses?.[0] || '';
         
-        if (ownerAddress && !userCache[ownerAddress]) {
-          try {
-            const userRes = await fetch(
-              `${FIREBASE_URL}/users/${ownerAddress}?key=${FIREBASE_API_KEY}`
-            );
-            const userData = await userRes.json();
-            userCache[ownerAddress] = parseField(userData.fields?.username) || ownerAddress.substring(0,6) + '...' + ownerAddress.slice(-4);
-          } catch(e) {
-            userCache[ownerAddress] = ownerAddress.substring(0,6) + '...' + ownerAddress.slice(-4);
+       ownerUsername = ownerAddress ? ownerAddress.substring(0,6) + '...' + ownerAddress.slice(-4) : '—';
           }
         }
         ownerUsername = userCache[ownerAddress] || ownerAddress.substring(0,6) + '...' + ownerAddress.slice(-4);
