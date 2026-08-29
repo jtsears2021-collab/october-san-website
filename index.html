@@ -718,13 +718,12 @@
   async function loadFeed() {
     try {
       // Fetch all NFTs from contract
-      const res = await fetch(
-        `https://137.insight.thirdweb.com/v1/nfts/${CONTRACT_ADDRESS}?limit=100`,
-        { headers: { 'x-client-id': CLIENT_ID } }
-      );
-      const data = await res.json();
-      const nfts = (data.data || []).reverse(); // newest first
-
+      const ownerRes = await fetch(
+            `https://polygon.insight.thirdweb.com/v1/nfts?contract_address=${CONTRACT_ADDRESS}&token_id=${tokenId}&chain=137`,
+            { headers: { 'x-client-id': CLIENT_ID } }
+          );
+          const ownerData = await ownerRes.json();
+          ownerAddress = ownerData.data?.[0]?.owner_addresses?.[0] || '';
       // Fetch marketplace listings
       const provider = new ethers.providers.JsonRpcProvider(`https://137.rpc.thirdweb.com/${CLIENT_ID}`);
       const marketAbi = [
