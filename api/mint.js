@@ -24,6 +24,7 @@ export default async function handler(req, res) {
     const wallet = new ethers.Wallet(ADMIN_PRIVATE_KEY, provider);
     const abi = [
       'function mintTo(address to, uint256 tokenId, string calldata uri, uint256 amount) external',
+      'event TransferSingle(address indexed operator, address indexed from, address indexed to, uint256 id, uint256 value)',
     ];
     const contract = new ethers.Contract(CONTRACT_ADDRESS, abi, wallet);
     const feeData = await provider.getFeeData();
