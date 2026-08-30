@@ -40,8 +40,10 @@ export default async function handler(req, res) {
       1,
       { maxFeePerGas, maxPriorityFeePerGas, gasLimit: 500000 }
     );
-    await tx.wait();
-    return res.status(200).json({ success: true, txHash: tx.hash });
+    const receipt = await tx.wait();
+    const transferEvent = receipt.events?.find(e => e.event === 'TransferSingle');
+    const tokenId = transferEvent?.args?.id?.toString() || null;
+    return res.status(200).json({ success: true, txHash: tx.hash, tokenId });
   } catch (err) {
     console.error('Mint error:', err.message);
     return res.status(500).json({ error: err.message });
