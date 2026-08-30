@@ -41,6 +41,7 @@ export default async function handler(req, res) {
       { maxFeePerGas, maxPriorityFeePerGas, gasLimit: 500000 }
     );
     const receipt = await tx.wait();
+    console.log('Receipt events:', JSON.stringify(receipt.events?.map(e => ({ event: e.event, args: e.args }))));
     const transferEvent = receipt.events?.find(e => e.event === 'TransferSingle');
     const tokenId = transferEvent?.args?.id?.toString() || null;
     return res.status(200).json({ success: true, txHash: tx.hash, tokenId });
