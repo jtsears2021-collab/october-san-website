@@ -13,8 +13,8 @@ export default async function handler(req, res) {
     const { tokenId, price, wallet } = req.body;
     
     const SECRET_KEY = process.env.THIRDWEB_SECRET_KEY;
-    const CONTRACT_ADDRESS = '0x397160Ad067BaaBa7f35Dd0b7A5C25F836b2539F';
-    const MARKETPLACE_ADDRESS = '0xef77CDF9Dc521563270B6aBba379dbc3d389C08c';
+    const CONTRACT_ADDRESS = '0xfe597C525A68c7150B3923fCfc8Fbf22b95806b1';
+    const MARKETPLACE_ADDRESS = '0x353aFb513F80F2D5b56D598EEA203D52D0D635f6';
     const SERVER_WALLET = '0x9B8f624f2821F98E1D0cC745Ec26B487e585204b';
     
     const priceInWei = ethers.utils.parseEther((parseFloat(price) / 0.07).toFixed(6)).toString();
