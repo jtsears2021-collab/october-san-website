@@ -250,10 +250,6 @@
       </div>
       <div class="divider"></div>
       <div class="price-row">
-        <span class="price-label">APPROX. USD</span>
-        <span class="price-value" id="price-usd">—</span>
-      </div>
-      <div class="price-row">
         <span class="price-label">SELLER</span>
         <span class="price-value" id="seller-addr">—</span>
       </div>
@@ -427,17 +423,13 @@
 
       listingId = listing.listingId.toString();
       const priceInPOL = ethers.utils.formatEther(listing.pricePerToken);
-      const priceInUSD = (parseFloat(priceInPOL) * 0.07).toFixed(2);
-
       listingData = {
         listingId,
         tokenId: tokenId.toString(),
         priceInPOL,
-        priceInUSD,
         seller: listing.listingCreator,
         priceWei: listing.pricePerToken.toString(),
       };
-
       // Update UI
       document.getElementById('loading').style.display = 'none';
       document.getElementById('nft-content').style.display = 'block';
@@ -446,7 +438,6 @@
       document.getElementById('nft-title').textContent = nft?.name || `October-San Moment #${tokenId}`;
       document.getElementById('nft-meta').textContent = `TOKEN #${tokenId} · OCTOBER-SAN · POLYGON`;
       document.getElementById('price-pol').textContent = `${parseFloat(priceInPOL).toFixed(4)} POL`;
-      document.getElementById('price-usd').textContent = `~$${priceInUSD} USD`;
       document.getElementById('seller-addr').textContent = `${listing.listingCreator.substring(0,6)}...${listing.listingCreator.slice(-4)}`;
 
       if (nft?.image_url) {
