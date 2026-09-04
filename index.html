@@ -342,9 +342,7 @@
       allListings = await Promise.all(active.map(async (l) => {
         const tokenId = l.tokenId.toString();
         const priceInPOL = ethers.utils.formatEther(l.pricePerToken);
-        const priceInUSD = (parseFloat(priceInPOL) * 0.07).toFixed(2);
         const listingId = l.listingId.toString();
-
         try {
           const res = await fetch(
             `https://137.insight.thirdweb.com/v1/nfts/${CONTRACT_ADDRESS}/${tokenId}`,
@@ -355,35 +353,30 @@
           const imageUrl = nft?.image_url?.startsWith('ipfs://')
             ? `https://${CLIENT_ID}.ipfscdn.io/ipfs/${nft.image_url.slice(7)}`
             : nft?.image_url;
-          return { tokenId, listingId, priceInPOL, priceInUSD, imageUrl, name: nft?.name || `Moment #${tokenId}` };
+          return { tokenId, listingId, priceInPOL, imageUrl, name: nft?.name || `Moment #${tokenId}` };
         } catch(e) {
-          return { tokenId, listingId, priceInPOL, priceInUSD, imageUrl: null, name: `Moment #${tokenId}` };
+          return { tokenId, listingId, priceInPOL, imageUrl: null, name: `Moment #${tokenId}` };
         }
       }));
-
       document.getElementById('loading').style.display = 'none';
       renderGrid();
-
     } catch(e) {
       console.error('Marketplace error:', e);
       showEmpty();
     }
   }
-
   function renderGrid() {
     const search = document.getElementById('search-input').value.toLowerCase();
     let filtered = allListings.filter(l =>
       !search || l.name.toLowerCase().includes(search) || l.tokenId.includes(search)
     );
-
     filtered = filtered.sort((a, b) => {
       if (currentSort === 'newest') return parseInt(b.tokenId) - parseInt(a.tokenId);
       if (currentSort === 'oldest') return parseInt(a.tokenId) - parseInt(b.tokenId);
-      if (currentSort === 'price-asc') return parseFloat(a.priceInUSD) - parseFloat(b.priceInUSD);
-      if (currentSort === 'price-desc') return parseFloat(b.priceInUSD) - parseFloat(a.priceInUSD);
+      if (currentSort === 'price-asc') return parseFloat(a.priceInPOL) - parseFloat(b.priceInPOL);
+      if (currentSort === 'price-desc') return parseFloat(b.priceInPOL) - parseFloat(a.priceInPOL);
       return 0;
     });
-
     document.getElementById('results-count').textContent = `${filtered.length} LISTED`;
 
     if (filtered.length === 0) {
@@ -403,8 +396,7 @@
         <div class="nft-info">
           <div class="nft-token">#${l.tokenId}</div>
           <div class="nft-name">${l.name}</div>
-          <div class="nft-price">$${l.priceInUSD}</div>
-          <div class="nft-price-sub">${parseFloat(l.priceInPOL).toFixed(2)} POL</div>
+          <div class="nft-price">${parseFloat(l.priceInPOL).toFixed(2)} POL</div>
         </div>
       </a>
     `).join('');
