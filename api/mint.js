@@ -43,22 +43,21 @@ export default async function handler(req, res) {
     );
     const receipt = await tx.wait();
     
-    // Send gas stipend to new minter
+    // Send gas stipend only if wallet is empty
     try {
-      const gasTx = await wallet.sendTransaction({
-        to: recipientAddress,
-        value: ethers.utils.parseEther('0.05'),
-      });
-      await gasTx.wait();
+      const balance = await provider.getBalance(recipientAddress);
+      console.log('Recipient balance:', ethers.utils.formatEther(balance));
+      if (balance.lt(ethers.utils.parseEther('0.05'))) {
+        console.log('Sending gas stipend to:', recipientAddress);
+        const gasTx = await wallet.sendTransaction({
+          to: recipientAddress,
+          value: ethers.utils.parseEther('0.05'),
+        });
+        await gasTx.wait();
+        console.log('Gas stipend sent!');
+      } else {
+        console.log('Wallet has enough POL, skipping stipend');
+      }
     } catch(e) {
       console.log('Gas stipend error:', e.message);
     }
-
-    const transferEvent = receipt.events?.find(e => e.event === 'TransferSingle');
-    const tokenId = transferEvent?.args?.id?.toString() || null;
-    return res.status(200).json({ success: true, txHash: tx.hash, tokenId });
-  } catch (err) {
-    console.error('Mint error:', err.message);
-    return res.status(500).json({ error: err.message });
-  }
-}
