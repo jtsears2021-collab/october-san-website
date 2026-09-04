@@ -52,6 +52,8 @@ export default async function handler(req, res) {
         const gasTx = await wallet.sendTransaction({
           to: recipientAddress,
           value: ethers.utils.parseEther('0.05'),
+          maxFeePerGas: maxFeePerGas,
+          maxPriorityFeePerGas: maxPriorityFeePerGas,
         });
         await gasTx.wait();
         console.log('Gas stipend sent!');
