@@ -57,5 +57,8 @@ export default async function handler(req, res) {
     const transferEvent = receipt.events?.find(e => e.event === 'TransferSingle');
     const tokenId = transferEvent?.args?.id?.toString() || null;
     return res.status(200).json({ success: true, txHash: tx.hash, tokenId });
+  } catch (err) {
+    console.error('Mint error:', err.message);
+    return res.status(500).json({ error: err.message });
   }
 }
