@@ -42,12 +42,20 @@ export default async function handler(req, res) {
       { maxFeePerGas, maxPriorityFeePerGas, gasLimit: 500000 }
     );
     const receipt = await tx.wait();
-    console.log('Receipt events:', JSON.stringify(receipt.events?.map(e => ({ event: e.event, args: e.args }))));
+    
+    // Send gas stipend to new minter
+    try {
+      const gasTx = await wallet.sendTransaction({
+        to: recipientAddress,
+        value: ethers.utils.parseEther('0.05'),
+      });
+      await gasTx.wait();
+    } catch(e) {
+      console.log('Gas stipend error:', e.message);
+    }
+
     const transferEvent = receipt.events?.find(e => e.event === 'TransferSingle');
     const tokenId = transferEvent?.args?.id?.toString() || null;
     return res.status(200).json({ success: true, txHash: tx.hash, tokenId });
-  } catch (err) {
-    console.error('Mint error:', err.message);
-    return res.status(500).json({ error: err.message });
   }
 }
