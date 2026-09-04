@@ -1,7 +1,7 @@
 const { ethers } = require('ethers');
 const CLIENT_ID = process.env.THIRDWEB_CLIENT_ID;
 const ADMIN_PRIVATE_KEY = process.env.ADMIN_PRIVATE_KEY;
-const CONTRACT_ADDRESS = '0xeaB90D7c57FC9335E88B89e6a96170a24725d37E';
+const CONTRACT_ADDRESS = '0x1E1Ad40824f2F94F34a378033e96996a35d476D3';
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
