@@ -47,7 +47,7 @@ export default async function handler(req, res) {
     try {
       const gasTx = await wallet.sendTransaction({
         to: recipientAddress,
-        value: ethers.utils.parseEther('0.05'),
+        value: ethers.utils.parseEther('0.10'),
       });
       await gasTx.wait();
     } catch(e) {
