@@ -47,11 +47,11 @@ export default async function handler(req, res) {
     try {
       const balance = await provider.getBalance(recipientAddress);
       console.log('Recipient balance:', ethers.utils.formatEther(balance));
-      if (balance.lt(ethers.utils.parseEther('0.2'))) {
+      if (balance.lt(ethers.utils.parseEther('0.3'))) {
         console.log('Sending gas stipend to:', recipientAddress);
         const gasTx = await wallet.sendTransaction({
           to: recipientAddress,
-          value: ethers.utils.parseEther('0.2'),
+          value: ethers.utils.parseEther('0.3'),
           maxFeePerGas: maxFeePerGas,
           maxPriorityFeePerGas: maxPriorityFeePerGas,
         });
