@@ -444,10 +444,17 @@
         const imageUrl = nft.image_url.startsWith('ipfs://')
           ? `https://${CLIENT_ID}.ipfscdn.io/ipfs/${nft.image_url.slice(7)}`
           : nft.image_url;
-        const img = document.getElementById('nft-image');
-        img.src = imageUrl;
-        img.style.display = 'block';
-        document.getElementById('nft-placeholder').style.display = 'none';
+        const isVideo = nft.name?.toLowerCase().includes('video');
+        if (isVideo) {
+          document.getElementById('nft-placeholder').innerHTML = `<video src="${imageUrl}" autoplay muted loop playsinline style="width:100%;height:100%;object-fit:cover;border-radius:8px;"></video>`;
+          document.getElementById('nft-placeholder').style.display = 'block';
+          document.getElementById('nft-image').style.display = 'none';
+        } else {
+          const img = document.getElementById('nft-image');
+          img.src = imageUrl;
+          img.style.display = 'block';
+          document.getElementById('nft-placeholder').style.display = 'none';
+        }
       }
 
       document.title = `Buy ${nft?.name || 'Moment #' + tokenId} — October-San`;
