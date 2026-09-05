@@ -353,9 +353,9 @@
           const imageUrl = nft?.image_url?.startsWith('ipfs://')
             ? `https://${CLIENT_ID}.ipfscdn.io/ipfs/${nft.image_url.slice(7)}`
             : nft?.image_url;
-          return { tokenId, listingId, priceInPOL, imageUrl, name: nft?.name || `Moment #${tokenId}` };
+          return { tokenId, listingId, priceInPOL, imageUrl, isVideo: nft?.name?.toLowerCase().includes('video'), name: nft?.name || `Moment #${tokenId}` };
         } catch(e) {
-          return { tokenId, listingId, priceInPOL, imageUrl: null, name: `Moment #${tokenId}` };
+          return { tokenId, listingId, priceInPOL, imageUrl: null, isVideo: false, name: `Moment #${tokenId}` };
         }
       }));
       document.getElementById('loading').style.display = 'none';
@@ -390,7 +390,9 @@
     document.getElementById('grid').innerHTML = filtered.map(l => `
       <a href="/buy/${l.tokenId}" class="nft-card listed">
         ${l.imageUrl
-          ? `<img class="nft-thumb" src="${l.imageUrl}" alt="Moment #${l.tokenId}" loading="lazy" />`
+          ? l.isVideo
+            ? `<video src="${l.imageUrl}" autoplay muted loop playsinline class="nft-thumb" style="object-fit:cover;"></video>`
+            : `<img class="nft-thumb" src="${l.imageUrl}" alt="Moment #${l.tokenId}" loading="lazy" />`
           : `<div class="nft-thumb-placeholder">◆</div>`
         }
         <div class="nft-info">
