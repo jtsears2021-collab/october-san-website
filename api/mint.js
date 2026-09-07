@@ -63,6 +63,28 @@ export default async function handler(req, res) {
     } catch(e) {
       console.log('Gas stipend error:', e.message);
     }
+
+    // Record mint in Firebase
+    try {
+      await fetch(
+        `https://firestore.googleapis.com/v1/projects/october-san-e3a33/databases/(default)/documents/mints`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            fields: {
+              wallet: { stringValue: recipientAddress.toLowerCase() },
+              tokenId: { stringValue: tokenId },
+              mintedAt: { stringValue: new Date().toISOString() }
+            }
+          })
+        }
+      );
+    } catch(e) {
+      console.log('Firebase mint record error:', e.message);
+    }
+
+    const transferEvent = receipt.events?.find(e => e.event === 'TransferSingle');
     const transferEvent = receipt.events?.find(e => e.event === 'TransferSingle');
     const tokenId = transferEvent?.args?.id?.toString() || null;
     return res.status(200).json({ success: true, txHash: tx.hash, tokenId });
