@@ -353,9 +353,18 @@
           const imageUrl = nft?.image_url?.startsWith('ipfs://')
             ? `https://${CLIENT_ID}.ipfscdn.io/ipfs/${nft.image_url.slice(7)}`
             : nft?.image_url;
-          return { tokenId, listingId, priceInPOL, imageUrl, isVideo: nft?.name?.toLowerCase().includes('video'), name: nft?.name || `Moment #${tokenId}` };
+          const sellerAddress = l.listingCreator.toLowerCase();
+          let username = null;
+          try {
+            const userData = await fetch(
+              `https://firestore.googleapis.com/v1/projects/october-san-e3a33/databases/(default)/documents/walletLookup/${sellerAddress}?key=AIzaSyBX6hKfUBi8oXx9ew22-jLpL4SxQJKoRIg`
+            );
+            const userJson = await userData.json();
+            username = userJson.fields?.username?.stringValue || null;
+          } catch(e) {}
+          return { tokenId, listingId, priceInPOL, imageUrl, isVideo: nft?.name?.toLowerCase().includes('video'), name: nft?.name || `Moment #${tokenId}`, username, sellerAddress };
         } catch(e) {
-          return { tokenId, listingId, priceInPOL, imageUrl: null, isVideo: false, name: `Moment #${tokenId}` };
+          return { tokenId, listingId, priceInPOL, imageUrl: null, isVideo: false, name: `Moment #${tokenId}`, username: null, sellerAddress: l.listingCreator.toLowerCase() };
         }
       }));
       document.getElementById('loading').style.display = 'none';
@@ -368,7 +377,7 @@
   function renderGrid() {
     const search = document.getElementById('search-input').value.toLowerCase();
     let filtered = allListings.filter(l =>
-      !search || l.name.toLowerCase().includes(search) || l.tokenId.includes(search)
+      !search || l.name.toLowerCase().includes(search) || l.tokenId.includes(search) || l.username?.toLowerCase().includes(search)
     );
     filtered = filtered.sort((a, b) => {
       if (currentSort === 'newest') return parseInt(b.tokenId) - parseInt(a.tokenId);
@@ -396,7 +405,7 @@
           : `<div class="nft-thumb-placeholder">◆</div>`
         }
         <div class="nft-info">
-          <div class="nft-token">#${l.tokenId}</div>
+          <div class="nft-token">#${l.tokenId} · @${l.username || l.sellerAddress?.substring(0,6) + '...' + l.sellerAddress?.slice(-4)}</div>
           <div class="nft-name">${l.name}</div>
           <div class="nft-price">${parseFloat(l.priceInPOL).toFixed(2)} POL</div>
         </div>
