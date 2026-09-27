@@ -84,6 +84,26 @@ export default async function handler(req, res) {
       console.log('Firebase mint record error:', e.message);
     }
 
+    // Record ownership in Firebase
+    try {
+      await fetch(
+        `https://firestore.googleapis.com/v1/projects/october-san-e3a33/databases/(default)/documents/ownership/${tokenId}`,
+        {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            fields: {
+              wallet: { stringValue: recipientAddress.toLowerCase() },
+              tokenId: { stringValue: tokenId },
+              updatedAt: { stringValue: new Date().toISOString() }
+            }
+          })
+        }
+      );
+    } catch(e) {
+      console.log('Firebase ownership record error:', e.message);
+    }
+
     const transferEvent = receipt.events?.find(e => e.event === 'TransferSingle');
     const transferEvent = receipt.events?.find(e => e.event === 'TransferSingle');
     const tokenId = transferEvent?.args?.id?.toString() || null;
