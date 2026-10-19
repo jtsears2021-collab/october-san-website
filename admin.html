@@ -613,6 +613,10 @@
         collectionNumber: parseField(f.collectionNumber) || 1,
         openTime: parseField(f.openTime) || '',
         closeTime: parseField(f.closeTime) || '',
+        venueLat: f.venueLat?.doubleValue || parseFloat(f.venueLat?.stringValue) || 34.0739,
+        venueLng: f.venueLng?.doubleValue || parseFloat(f.venueLng?.stringValue) || -118.2400,
+        venueRadius: parseField(f.venueRadius) || 400,
+        venueName: parseField(f.venueName) || 'Dodger Stadium',
       };
       updateStatusBar();
       updateForm();
@@ -653,6 +657,10 @@
     if (currentCollection.closeTime) {
       document.getElementById('game-close-time').value = toLocalDateTimeInput(currentCollection.closeTime);
     }
+    document.getElementById('venue-name').value = currentCollection.venueName || '';
+    document.getElementById('venue-radius').value = currentCollection.venueRadius || 400;
+    document.getElementById('venue-lat').value = currentCollection.venueLat || '';
+    document.getElementById('venue-lng').value = currentCollection.venueLng || '';
   }
 
   function toLocalDateTimeInput(isoString) {
@@ -688,6 +696,10 @@
       teams: toStringField(document.getElementById('game-teams').value),
       gameDate: toStringField(document.getElementById('game-date').value),
       maxMints: toIntField(document.getElementById('game-max-mints').value || 1000),
+      venueName: toStringField(document.getElementById('venue-name').value),
+      venueRadius: toIntField(document.getElementById('venue-radius').value || 400),
+      venueLat: { doubleValue: parseFloat(document.getElementById('venue-lat').value) || 34.0739 },
+      venueLng: { doubleValue: parseFloat(document.getElementById('venue-lng').value) || -118.2400 },
     };
 
     if (openTimeInput) fields.openTime = toStringField(new Date(openTimeInput).toISOString());
